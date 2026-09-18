@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Misfits Roster</title>
+
+  <!-- Bootstrap first so your custom CSS can override it -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Sports-style heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared site styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  />
+
+  <!-- Roster page styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/roster.css') }}"
+  />
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+      <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"/>
+      
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a class="active" href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a href="{{ url_for('standings') }}">Standings</a></li>
+    </ul>
+
+    <div class="nav_actions">
+    <!--Season dropdown-->
+    <details class="user-menu">
+        <summary class="loginButton">
+            {{selected_season.name}}
+        </summary>
+
+        <div class="user-dropdown"> 
+            {%for season in all_seasons %}
+            <a href="{{ url_for(
+                'change_season',
+                season_id=season.id,
+                next=request.path
+            ) }}">
+                {{ season.name }}
+            </a> 
+            {%endfor %}      
+        </div>
+    </details>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}"> Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}">Manage Standings</a>
+            <a href="#">Edit Stats</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+       Login
+    </a>
+
+{% endif %}
+    
+  </nav>
+
+  <!-- Roster Hero -->
+  <section class="roster-hero">
+    <img
+      class="roster-hero-img"
+      src="{{ url_for('static', filename='images/pucks.png') }}"
+      alt="Hockey pucks on ice"
+    />
+
+    <div class="roster-hero-overlay"></div>
+
+    <div class="roster-hero-content">
+      <h1>Roster</h1>
+      <p>{{selected_season.name}}</p>
+
+      <div class="hero-divider" aria-hidden="true">
+        <span></span>
+        <span class="stick-icon">⌯</span>
+        <span></span>
+      </div>
+    </div>
+  </section>
+
+  <main class="roster-page">
+
+    <!-- Team Summary Card -->
+    <section class="roster-summary-card">
+      <div class="team-identity">
+        <img
+          class="summary-logo"
+          src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"
+          alt="Misfits Hockey logo"
+        />
+
+        <div>
+          <h2>Misfits Hockey</h2>
+          <p class="summary-location">📍 Iceland Arena</p>
+          <p class="summary-tagline">Passion. Grit. Misfits.</p>
+        </div>
+      </div>
+
+      <div class="summary-stats">
+        <div class="summary-stat">
+          <span class="summary-icon">👥</span>
+          <strong>{{ player_count.total if player_count.total is defined else 0 }}</strong>
+          <span>Players</span>
+        </div>
+
+        <div class="summary-stat">
+          <span class="summary-icon">⌯</span>
+          <strong>{{ player_count.forwards if player_count is defined else 0 }}</strong>
+          <span>Forwards</span>
+        </div>
+
+        <div class="summary-stat">
+          <span class="summary-icon">🛡️</span>
+          <strong>{{ player_count.defense if player_count is defined else 0 }}</strong>
+          <span>Defender</span>
+        </div>
+
+        <div class="summary-stat">
+          <span class="summary-icon">🥅</span>
+          <strong>{{ player_count.goalies if player_count is defined else 0 }}</strong>
+          <span>Goalies</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roster Filters  -->
+    <section class="roster-tabs" aria-label="Roster filters">
+      <button class="active" type="button" data-filter="all">👥 All Players</button>
+      <button type="button" data-filter="forwards">⌯ Forwards</button>
+      <button type="button" data-filter="defense">🛡️ Defense</button>
+      <button type="button" data-filter="goalies">🥅 Goalies</button>
+    </section>
+
+
+{% for section_key, section_players in grouped_players.items() %}
+  <section class="roster-section" data-section="{{ section_key }}">
+    <div class="roster-section-heading">
+      <h2>
+        <span>{{ section_info[section_key].icon }}</span>
+        {{ section_info[section_key].title }}
+      </h2>
+      <p>{{ section_players|length }} Players</p>
+    </div>
+
+    <div class="player-grid">
+      {% for player in section_players %}
+        <article class="player-card {% if section_key == 'goalies' %}goalie-card{% endif %}">
+          <div class="player-top">
+            <span class="jersey-number">{{ player.Number }}</span>
+
+            <div class="player-name">
+              <span>{{ player.First_Name }}</span>
+              <strong>{{ player.Last_Name }}</strong>
+              <small>{{ player.Position }}</small>
+            </div>
+
+          </div>
+
+          <div class="player-stats">
+            <div>
+              <span>GP</span>
+              <strong>{{ player.Games_Played or 0 }}</strong>
+            </div>
+            {%if section_key =="goalies"%}
+            <div>
+            <span>W</span>
+              <strong>{{ player.Wins or 0 }}</strong>
+            </div>
+            <div>
+              <span>L</span>
+              <strong>{{ player.Loss or 0 }}</strong>
+            </div>
+            <div>
+              <span>SO</span>
+              <strong>{{ player.Shutouts or 0 }}</strong>
+            </div>
+
+
+            {% else %}
+            <div>
+              <span>PTS</span>
+              <strong>{{ player.Points or 0 }}</strong>
+            </div>
+            <div>
+              <span>AST</span>
+              <strong>{{ player.Assists or 0 }}</strong>
+            </div>
+          </div>
+          {%endif%}
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+
+
+
+    <!-- Bottom Note -->
+    <section class="roster-note">
+      <div class="note-icon" aria-hidden="true">📅</div>
+      <div>
+        <h3>Built different. United as Misfits.</h3>
+        <p>The ice does not care who you were yesterday. Prove it every shift.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    &copy; 2026 Misfits. All Rights Reserved
+  </footer>
+
+  <script>
+    // Simple front-end filter for the roster tabs.
+    const filterButtons = document.querySelectorAll(".roster-tabs button");
+    const rosterSections = document.querySelectorAll(".roster-section");
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+
+        filterButtons.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+
+        rosterSections.forEach((section) => {
+          const shouldShow = filter === "all" || section.dataset.section === filter;
+          section.style.display = shouldShow ? "block" : "none";
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

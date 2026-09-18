@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Misfits Game Preview</title>
+
+  <!-- Bootstrap first so your custom CSS can override it -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Sports-style heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared site styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  />
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/game_preview.css') }}"
+  />
+</head>
+
+<body>
+
+{% set status = game.status|default('', true)|trim|lower %}
+{% set display_time = game.time_ if game.time_ is defined and game.time_ else game.time_|default('TBD', true) %}
+{% set display_date = game.date|default('TBD', true) %}
+{% set opponent = game.oppon|default('Opponent TBD', true) %}
+{% set location = game.loc|default('Location TBD', true) %}
+{% set result = game.result|default('', true) %}
+{% set team_score = game.team_score|default('0', true) %}
+{% set oppo_score = game.oppo_score|default('0', true) %}
+
+<nav class="site-nav">
+  <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+    <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"/>
+  </a>
+
+  <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a href="{{ url_for('standings') }}">Standings</a></li>
+    </ul>
+
+   <!--Check if user is admin-->
+    <div class="nav_actions">
+    <!--Season dropdown-->
+    <details class="user-menu">
+        <summary class="loginButton">
+            {{selected_season.name}}
+        </summary>
+
+        <div class="user-dropdown"> 
+            {%for season in all_seasons %}
+            <a href="{{ url_for(
+                'change_season',
+                season_id=season.id,
+                next=schedule
+            ) }}">
+                {{ season.name }}
+            </a> 
+            {%endfor %}      
+        </div>
+    </details>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}"> Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}">Manage Standings</a>
+            <a href="#">Edit Stats</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+        Login
+    </a>
+
+{% endif %}
+  </nav>
+
+<main class="preview-page">
+
+  <a href="{{ url_for('schedule') }}" class="back-link">← Back to Schedule</a>
+
+  <h1 class="preview-title">Game Preview</h1>
+
+  <section class="preview-layout">
+
+    <!-- Main content -->
+    <div class="preview-main">
+
+      <section class="matchup-card">
+
+        <div class="game-badge">
+          {% if status == "final" %}
+            Final Game
+          {% else %}
+            Upcoming Game
+          {% endif %}
+        </div>
+
+        <div class="matchup-date">
+          <p>{{ display_date }}</p>
+          <h2>{{ display_time }} PM</h2>
+        </div>
+
+        <div class="teams-row">
+
+          <div class="team-block">
+            <img
+              src="{{ url_for('static', filename='images/misfits_logo.png') }}"
+              alt="Misfits logo"
+              class="team-logo"
+            >
+            <h3>Misfits</h3>
+          </div>
+
+          <div class="vs-block">
+            {% if status == "final" %}
+              <div class="final-score">{{ team_score }} - {{ oppo_score |default(0,true) }}</div>
+            {% else %}
+              <span>VS</span>
+            {% endif %}
+          </div>
+
+          <div class="team-block">
+           
+            <img
+              src="{{ url_for('static', filename= game.oppo_logo) }}"
+              alt="{{ opponent }} logo"
+              class="team-logo"
+            >
+            <h3>{{ opponent }}</h3>
+          </div>
+
+        </div>
+
+        <div class="matchup-meta">
+          <div>
+            <span class="meta-icon">📍</span>
+            <div>
+              {% if game.loc_link is defined and game.loc_link %}
+                <a href="{{ game.loc_link }}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+                  <strong>{{ location }}</strong>
+                  <p>Mississauga, ON</p>
+                </a>
+              {% else %}
+                <strong>{{ location }}</strong>
+                <p>Mississauga, ON</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div>
+            <span class="meta-icon">📅</span>
+            <div>
+              <strong>{{ game.season|default('2026 Summer Season', true) }}</strong>
+              <p>{{ game.game_type|default('Regular Season', true) }}</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="preview-card overview-card">
+        <div>
+          <h2>Game Overview</h2>
+
+          {% if status == "final" %}
+            <p>
+              The Misfits finished this game with a result of
+              <strong>{{ result }}</strong>.
+            </p>
+            <p>
+              Final Score:
+              <strong>Misfits {{ team_score }} - {{ oppo_score }} {{ opponent }}</strong>.
+            </p>
+          {% else %}
+            <p>
+              The Misfits are set to face the {{ opponent }} in their upcoming matchup.
+            </p>
+            <p>
+              Puck drop is scheduled for <strong>{{ display_time }} PM</strong>
+              at <strong>{{ location }}</strong>.
+            </p>
+          {% endif %}
+        </div>
+
+        <div class="record-box">
+          <div class="record-number">{{team_rec.Wins|default('0', true)}}-{{team_rec.Loss |default('0', true) }}-{{team_rec.Ties |default('0', true) }}</div>
+          <div class="record-label">Misfits Record</div>
+
+          <div class="record-number">{{ op_rec.Wins|default('0', true)}}-{{op_rec.Loss |default('0', true) }}-{{op_rec.Ties |default('0', true) }}</div>
+          <div class="record-label">{{ opponent }} Record</div>
+        </div>
+      </section>
+
+      
+
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="preview-sidebar">
+
+      <section class="sidebar-card">
+        <h2>Game Details</h2>
+
+        <div class="detail-row">
+          <span>Date</span>
+          <strong>{{ display_date }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Time</span>
+          <strong>{{ display_time }} PM</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Location</span>
+          <strong>{{ location }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Status</span>
+          <strong>{{ game.status|default('Scheduled', true) }}</strong>
+        </div>
+
+        {% if status == "final" %}
+          <div class="detail-row">
+            <span>Result</span>
+            <strong>{{ result }}</strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Score</span>
+            <strong>{{ team_score }} - {{ oppo_score  }}</strong>
+          </div>
+        {% endif %}
+      </section>
+
+      {% if status != "final" %}
+      <section class="sidebar-card">
+        <h2>Add to Calendar</h2>
+        <p>Don’t miss the game!</p>
+        <button
+          id="add-calendar-btn"
+          class="calendar-btn"
+          data-opponent="{{ opponent }}"
+          data-location="{{ location }}"
+          data-date="{{ display_date }}"
+          data-time="{{ display_time }}"
+        >
+          📅 Add to Calendar
+        </button>
+      </section>
+      {% endif %}
+
+      <section class="sidebar-card">
+        <h2>Previous Matchup</h2>
+
+        {% if prev %}
+        <div class="previous-score">
+          <img
+            src="{{ url_for('static', filename='images/misfits_logo.png') }}"
+            alt="Misfits logo"
+            class="previous-logo"
+          >
+
+          <div>
+            <strong>{{ prev.score_team}}-{{prev.score_opponent}}</strong>
+            <span>{{  prev.Result  }}</span>
+            <small>{{ prev.date |convert_date(None) }}</small>
+          </div>
+
+          <img
+            src="{{ game.oppo_logo if game.oppo_logo is defined and game.oppo_logo else url_for('static', filename='images/default_logo.png') }}"
+            alt="{{ opponent }} logo"
+            class="previous-logo"
+          >
+        </div>
+        {% else%}
+        <span class="calendar-icon">📅</span>
+        <strong>No Previous Matchup</strong>
+        {% endif %}
+      </section>
+
+      <section class="sidebar-card">
+        <h2>Quick Links</h2>
+
+        <a href="{{ url_for('schedule') }}" class="quick-link">
+          View Full Schedule <span>›</span>
+        </a>
+
+        <a href="{{ url_for('standings') }}" class="quick-link">
+          View Standings <span>›</span>
+        </a>
+
+        <a href="{{ url_for('roster') }}" class="quick-link">
+          View Roster <span>›</span>
+        </a>
+      </section>
+
+    </aside>
+
+  </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='js/game_preview.js') }}"></script>
+
+</body>
+</html>

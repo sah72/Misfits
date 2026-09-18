@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Misfits Hockey{% endblock %}</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('schedule') }}">Schedule</a>
+        <a href="{{ url_for('standings') }}">Standings</a>
+        <a href="{{ url_for('roster') }}">Roster</a>
+
+        {% if current_user.is_authenticated %}
+
+            <details class="user-menu">
+                <summary class="login-btn">
+                    Admin
+                </summary>
+
+                <div class="user-dropdown">
+                    <a href="{{ url_for('admin') }}">Dashboard</a>
+                    <a href="#">Edit Games</a>
+                    <a href="#">Edit Stats</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            </details>
+
+        {% else %}
+
+            <a
+                href="{{ url_for('login', next=request.path) }}"
+                class="login-btn"
+            >
+                Login
+            </a>
+
+        {% endif %}
+    </nav>
+
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+
+# Virtual environment
+/venv/
+
+# Environment variables (passwords and secrets)
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+/create_admin.py
+
+# Personal project files
+/Draft-Mockups/
+/User Admin.docx
+/TODO in Misfits Website.txt
+/Misfits_Hockey_QA_Test_Plan.xlsx
+
+# Local database files
+*.db
+*.sqlite3
+
+# Local Flask instance files
+/instance/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Microsoft Office temporary files
+~$*

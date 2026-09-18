@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Manage Standings</title>
+
+  <!-- Bootstrap first so your custom CSS can override it -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Sports-style heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared site styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  />
+
+  <!-- Standings page styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/manage_standings.css') }}"
+  />
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+      <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"/>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a href="{{ url_for('standings') }}">Standings</a></li>
+      </ul>
+
+    <!--Check if user is admin-->
+    <div class="nav_actions">
+    <!--Season dropdown-->
+    <details class="user-menu">
+        <summary class="loginButton">
+            {{selected_season.name}}
+        </summary>
+
+        <div class="user-dropdown"> 
+            {%for season in all_seasons %}
+            <a href="{{ url_for(
+                'change_season',
+                season_id=season.id,
+                next=request.path
+            ) }}">
+                {{ season.name }}
+            </a> 
+            {%endfor %}      
+        </div>
+    </details>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}"> Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}"> Manage Standings</a>
+            <a href="#">Edit Stats</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+        Login
+    </a>
+
+{% endif %}
+  </nav>
+
+<main class="manage-standings-page">
+
+    <!-- Page Heading -->
+    <div class="manage-heading">
+        <div>
+            <h1>Manage Standings</h1>
+            <p>{{ selected_season.name }} Season</p>
+        </div>
+
+        <div class="manage-heading-actions">
+            <a href="{{ url_for('manage_standings', add=1) }}"
+                class="btn-add-team">
+                <span>+</span>
+                Add Team
+            </a>
+
+            <button
+                type="submit"
+                form="standings-form"
+                class="btn-save"
+            >
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+
+    <div class="standings-admin-layout">
+
+        <!-- ========================= -->
+        <!-- STANDINGS TABLE           -->
+        <!-- ========================= -->
+
+        <section class="standings-admin-card">
+
+            <form
+                id="standings-form"
+                method="POST"
+                action="{{ url_for('manage_standings') }}"
+            >
+            <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token() }}"
+>
+
+                <div class="standings-table-wrapper">
+
+                    <table class="manage-standings-table">
+
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Team</th>
+                                <th>GP</th>
+                                <th>W</th>
+                                <th>L</th>
+                                <th>T</th>
+                                <th>OT</th>
+                                <th>GF</th>
+                                <th>GA</th>
+                                <th>PIM</th>
+                                <th>Points</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for team in standings %}
+                            <tr>
+                                <!-- Rank -->
+                                <td class="rank-cell">
+                                    {{ loop.index }}
+                                </td>
+
+
+                                <!-- Team -->
+                                <td>
+                                    <div class="team-cell">
+
+                                        <img
+                                            src="{{ url_for(
+                                                'static',
+                                                filename=team.logo
+                                            ) }}"
+                                            alt="{{ team.Team }} logo"
+                                            class="standings-team-logo"
+                                        >
+
+                                        <strong>
+                                            {{ team.Team }}
+                                        </strong>
+
+                                    </div>
+                                </td>
+
+                                <!-- Games Played -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="gp_{{ team.standings_id }}"
+                                        value="{{ team.Games_Played if team.Games_Played is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+
+                                <!-- Wins -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="wins_{{ team.standings_id }}"
+                                        value="{{ team.Wins if team.Wins is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+
+
+                                <!-- Losses -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="losses_{{ team.standings_id }}"
+                                        value="{{ team.Loss if team.Loss is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+                                <!-- Ties -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="ties_{{ team.standings_id }}"
+                                        value="{{ team.Ties if team.Ties is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+
+
+                                <!-- OT Losses -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="ot_losses_{{ team.standings_id }}"
+                                        value="{{ team.OT_Loss if team.OT_Loss is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+
+                                <!-- Goals For -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="goals_for_{{ team.standings_id }}"
+                                        value="{{ team.Goals_For if team.Goals_For is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+                                <!-- Goals Against -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="goals_against_{{ team.standings_id }}"
+                                        value="{{ team.Goals_Against if team.Goals_Against is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+
+                                <!-- PIM -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="pim_{{ team.standings_id }}"
+                                        value="{{ team.Pim if team.Pim is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+
+
+                                <!-- Points -->
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="points_{{ team.standings_id }}"
+                                        value="{{ team.Points if team.Points is not none else 0 }}"
+                                        min="0"
+                                        class="stat-input"
+                                    >
+                                </td>
+    
+                                <td>
+                                    <div class="team-actions">
+                                      <a
+    href="{{ url_for('manage_standings', edit=team.standings_id) }}"
+    class="btn-edit-team"
+>
+    Edit
+</a>
+                                    
+ 
+     <button
+             type="submit"
+                        class="btn-delete-team"
+                        formaction="{{ url_for(
+                            'delete_team',
+                            standings_id=team.standings_id
+                        ) }}"
+                        formmethod="POST"
+                        onclick="return confirm(
+                            'Are you sure you want to delete this team?');"
+        >
+            Delete
+        </button>
+                                      
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- Hidden delete forms so they don't interfere
+             with the main standings form -->
+
+        {#{% for team in standings %}
+
+        <form
+            id="delete-team-{{ team.standings_id }}"
+            method="POST"
+            action=#
+        >
+        <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token() }}"
+>
+        </form> 
+
+        {% endfor %}#}
+
+
+
+        <!-- ========================= -->
+        <!-- EDIT TEAM PANEL           -->
+        <!-- ========================= -->
+
+        <aside class="edit-team-card">
+
+
+    {% if add_team_mode %}
+
+        <div class="edit-card-heading">
+            <h2>Add Team</h2>
+
+            <a
+                href="{{ url_for('manage_standings') }}"
+                class="close-edit"
+                aria-label="Cancel adding team"
+            >
+                ×
+            </a>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token() }}"
+>
+        <div class="form-group">
+            <label for="team_name">
+                Team Name
+            </label>
+
+            <input
+                type="text"
+                id="team_name"
+                name="team_name"
+                placeholder="Enter team name"
+            >
+        </div>
+        <div class="form-group">
+            <label for="team_logo">
+                Team Logo
+            </label>
+
+            <input
+                type="file"
+                id="team_logo"
+                name="team_logo"
+                accept="image/*"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="wins">Wins</label>
+
+            <input
+                type="number"
+                id="wins"
+                name="wins"
+                value="0"
+                min="0"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="losses">Losses</label>
+
+            <input
+                type="number"
+                id="losses"
+                name="losses"
+                value="0"
+                min="0"
+            >
+        </div>
+        <div class="form-group">
+            <label for="ties">Ties</label>
+
+            <input
+                type="number"
+                id="ties"
+                name="ties"
+                value="0"
+                min="0"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="ot_losses">OT Losses</label>
+
+            <input
+                type="number"
+                id="ot_losses"
+                name="ot_losses"
+                value="0"
+                min="0"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="points">Points</label>
+
+            <input
+                type="number"
+                id="points"
+                name="points"
+                value="0"
+                min="0"
+            >
+        </div>
+
+        <button
+            type="submit"
+            class="btn-save-team"
+        >
+            Add Team
+        </button>
+
+        <a
+            href="{{ url_for('manage_standings') }}"
+            class="btn-cancel"
+        >
+            Cancel
+        </a>
+
+        {%elif edit_team%}
+        
+
+    <div class="edit-card-heading">
+
+        <h2>Edit Team</h2>
+
+        <a
+            href="{{ url_for('manage_standings') }}"
+            class="close-edit"
+            aria-label="Cancel editing team"
+        >
+            ×
+        </a>
+
+    </div>
+
+    <form
+        method="POST"
+        action="{{ url_for('edit_team', standings_id=edit_team.standings_id) }}"
+        enctype="multipart/form-data"
+    >
+    <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token() }}"
+>
+
+        <div class="form-group">
+            <label for="team_name">
+                Team Name
+            </label>
+
+            <input
+                type="text"
+                id="team_name"
+                name="team_name"
+                value="{{ edit_team.Team }}"
+                required
+            >
+        </div>
+
+
+        <div class="form-group">
+            <label for="team_logo_">
+                Team Logo
+            </label>
+
+            <input
+                type="file"
+                id="team_logo_"
+                name="team_logo_"
+                accept="image/*"
+            >
+
+            <p>Leave blank to keep the current logo.</p>
+        </div>
+
+
+        <div class="form-group">
+            <label for="wins">
+                Wins
+            </label>
+
+            <input
+                type="number"
+                id="wins"
+                name="wins"
+                value="{{ edit_team.Wins }}"
+                min="0"
+            >
+        </div>
+
+
+        <div class="form-group">
+            <label for="losses">
+                Losses
+            </label>
+
+            <input
+                type="number"
+                id="losses"
+                name="losses"
+                value="{{ edit_team.Loss }}"
+                min="0"
+            >
+        </div>
+
+
+        <div class="form-group">
+            <label for="ot_losses">
+                OT Losses
+            </label>
+
+            <input
+                type="number"
+                id="ot_losses"
+                name="ot_losses"
+                value="{{ edit_team.OT_Loss }}"
+                min="0"
+            >
+        </div>
+
+
+        <div class="form-group">
+            <label for="points">
+                Points
+            </label>
+
+            <input
+                type="number"
+                id="points"
+                name="points"
+                value="{{ edit_team.Points }}"
+                min="0"
+            >
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn-save-team"
+        >
+            Save Changes
+        </button>
+
+        <a
+            href="{{ url_for('manage_standings') }}"
+            class="btn-cancel"
+        >
+            Cancel
+        </a>
+
+    </form>  
+
+    
+        {% else %}
+
+        <div class="edit-card-heading">
+            <h2>Manage Teams</h2>
+        </div>
+
+        <p class="empty-edit-message">
+            Select a team to edit its name or logo,
+            or add a new team.
+        </p>
+
+    {% endif %}
+
+    
+
+</aside>
+
+    </div>
+
+
+    <!-- Information -->
+    <div class="standings-help">
+
+        <span class="help-icon">
+            i
+        </span>
+
+        <div>
+            <p>
+                Standings are calculated based on wins,
+                losses and overtime losses.
+            </p>
+
+            <p>
+                Points: Win = 2 pts | OT Loss = 1 pt |
+                Loss = 0 pts
+            </p>
+        </div>
+
+    </div>
+
+</main>
+
+
+  </body>

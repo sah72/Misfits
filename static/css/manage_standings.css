@@ -1,0 +1,877 @@
+/* ==================================
+   MANAGE STANDINGS
+================================== */
+
+.manage-standings-page {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 38px 38px 60px;
+    color: var(--purple-dark);
+}
+
+
+/* ==================================
+   PAGE HEADING
+================================== */
+
+.manage-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+
+    margin-bottom: 28px;
+}
+
+.manage-heading h1 {
+    margin: 0;
+
+    font-size: 2.35rem;
+    font-weight: 700;
+
+    color: var(--purple-dark);
+}
+
+.manage-heading p {
+    margin: 5px 0 0;
+
+    font-size: 1.1rem;
+    font-weight: 700;
+
+    color: var(--purple-bright);
+}
+
+.manage-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+
+/* ==================================
+   TOP BUTTONS
+================================== */
+
+.btn-add-team,
+.btn-save {
+    min-height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 24px;
+
+    border-radius: 8px;
+
+    font-size: 0.95rem;
+    font-weight: 800;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* Add Team */
+
+.btn-add-team {
+    background: var(--cream-light);
+
+    color: var(--purple-dark);
+
+    border: 2px solid var(--gold);
+}
+
+.btn-add-team span {
+    margin-right: 9px;
+
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.btn-add-team:hover {
+    background: var(--cream);
+    color: var(--purple-dark);
+
+    transform: translateY(-2px);
+}
+
+
+/* Save */
+
+.btn-save {
+    border: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple-main),
+            var(--purple-bright)
+        );
+
+    color: white;
+
+    box-shadow:
+        0 5px 13px rgba(59, 6, 76, 0.15);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 18px rgba(59, 6, 76, 0.2);
+}
+
+
+/* ==================================
+   TWO-COLUMN ADMIN LAYOUT
+================================== */
+
+.standings-admin-layout {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        285px;
+
+    gap: 22px;
+
+    align-items: start;
+}
+
+
+/* ==================================
+   MAIN TABLE CARD
+================================== */
+
+.standings-admin-card {
+    background:
+        linear-gradient(
+            135deg,
+            var(--cream-light),
+            var(--cream)
+        );
+
+    border: 1px solid var(--border-soft);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+
+.standings-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+     /* Only show scrollbar when genuinely needed */
+    scrollbar-width: thin;
+}
+
+
+/* ==================================
+   TABLE
+================================== */
+
+.manage-standings-table {
+    width: 100%;
+
+    border-collapse: collapse;
+    table-layout: auto;
+
+    background: transparent;
+
+    color: var(--purple-dark);
+    font-size: 0.9rem;
+}
+
+
+/* Header */
+.manage-standings-table thead {
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple-dark),
+            var(--purple-main));
+}
+
+.manage-standings-table th {
+    padding: 15px 7px;
+
+    color: var(--cream);
+    text-align: center;
+
+    font-size: 0.78rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Team heading should stay left aligned */
+.manage-standings-table th:nth-child(2) {
+    text-align: left;
+}
+
+
+/* Rows */
+
+.manage-standings-table td {
+    padding: 8px 5px;
+
+    border-bottom:
+        1px solid rgba(217, 194, 164, 0.55);
+
+    vertical-align: middle;
+    text-align: center;
+}
+
+.manage-standings-table tbody tr {
+    transition:
+        background-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.manage-standings-table tbody tr:hover {
+    background: rgba(231, 201, 137, 0.12);
+}
+
+
+/* ==================================
+   RANK
+================================== */
+
+.rank-cell {
+    width: 32px;
+
+    font-size: 1rem;
+    font-weight: 800;
+
+    text-align: center;
+}
+
+
+/* ==================================
+   TEAM CELL
+================================== */
+
+.team-cell {
+    min-width: 165px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    text-align: left;
+    white-space: nowrap;
+}
+
+.team-cell strong {
+    font-size: 1rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+.standings-team-logo {
+    width: auto;
+    height: 80px;
+
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+
+/* ==================================
+   NUMBER INPUTS
+================================== */
+
+.stat-input {
+    width: 62px;
+    height: 52px;
+
+    box-sizing: border-box;
+
+    padding: 0 5px;
+
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+
+    background: rgba(255, 255, 255, 0.72);
+
+    color: var(--purple-dark);
+
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    text-align: center;
+
+    /* Numbers line up more cleanly */
+    font-variant-numeric: tabular-nums;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        background-color 0.15s ease;
+}
+
+.stat-input:hover {
+    background: white;
+    border-color: rgba(93, 11, 122, 0.35);
+}
+
+.stat-input:focus {
+    outline: none;
+
+    background: white;
+    border-color: var(--purple-bright);
+
+    box-shadow:
+        0 0 0 3px rgba(93, 11, 122, 0.10);
+}
+/* ==================================
+   ROW ACTIONS
+================================== */
+
+.team-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    min-width: 76px;
+    white-space: nowrap;
+}
+
+.btn-edit-team,
+.btn-delete-team {
+    width: 70px;
+    min-width: 70px;
+
+    padding: 6px 8px;
+
+    font-size: 0.78rem;
+}
+
+
+/* Edit */
+
+.btn-edit {
+    border:
+        1px solid var(--purple-bright);
+
+    color: var(--purple-main);
+}
+
+.btn-edit:hover {
+    background:
+        rgba(93, 11, 122, 0.08);
+
+    color: var(--purple-dark);
+}
+
+
+/* Remove */
+
+.btn-remove {
+    border:
+        1px solid #d8424b;
+
+    color: #cf313a;
+}
+
+.btn-remove:hover {
+    background:
+        rgba(216, 66, 75, 0.08);
+}
+
+
+/* ==================================
+   EDIT TEAM CARD
+================================== */
+
+.edit-team-card {
+    background:
+        linear-gradient(
+            135deg,
+            var(--cream-light),
+            var(--cream)
+        );
+
+    border:
+        1px solid var(--border-soft);
+
+    border-radius: 10px;
+
+    padding: 24px;
+
+    box-shadow:
+        0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+
+/* Heading */
+
+.edit-card-heading {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding-bottom: 13px;
+
+    margin-bottom: 22px;
+
+    border-bottom:
+        2px solid var(--gold);
+}
+
+.edit-card-heading h2 {
+    margin: 0;
+
+    color: var(--purple-dark);
+
+    font-size: 1.45rem;
+    font-weight: 700;
+}
+
+.close-edit {
+    color: var(--purple-dark);
+
+    font-size: 1.8rem;
+
+    text-decoration: none;
+
+    line-height: 1;
+}
+
+
+/* ==================================
+   EDIT FORM
+================================== */
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group > label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    font-size: 0.82rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    min-height: 48px;
+
+    padding: 0 13px;
+
+    border:
+        1px solid var(--border-soft);
+
+    border-radius: 7px;
+
+    background:
+        rgba(255, 255, 255, 0.62);
+
+    color: var(--purple-dark);
+
+    font-size: 1rem;
+}
+
+.form-group input[type="text"]:focus {
+    outline: none;
+
+    border-color: var(--purple-bright);
+
+    box-shadow:
+        0 0 0 3px rgba(93, 11, 122, 0.10);
+}
+
+
+/* ==================================
+   LOGO EDIT
+================================== */
+
+.logo-edit-area {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1.25fr;
+
+    gap: 12px;
+}
+
+
+.current-logo-box {
+    text-align: center;
+}
+
+.logo-preview {
+    min-height: 145px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(255, 255, 255, 0.45);
+
+    border:
+        1px solid var(--border-soft);
+
+    border-radius: 7px;
+
+    margin-bottom: 8px;
+}
+
+.logo-preview img {
+    width: 105px;
+    height: 105px;
+
+    object-fit: contain;
+}
+
+.current-logo-box span {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+
+/* Upload Box */
+
+.logo-upload-box {
+    min-height: 145px;
+
+    display: flex !important;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 15px;
+
+    border:
+        2px dashed var(--border-soft);
+
+    border-radius: 7px;
+
+    background:
+        rgba(255, 255, 255, 0.32);
+
+    text-align: center;
+
+    cursor: pointer;
+}
+
+.logo-upload-box:hover {
+    border-color: var(--purple-bright);
+
+    background:
+        rgba(93, 11, 122, 0.04);
+}
+
+.upload-icon {
+    font-size: 2rem;
+
+    color: var(--purple-main);
+}
+
+.logo-upload-box strong {
+    font-size: 0.85rem;
+}
+
+.logo-upload-box small {
+    color: #74687a;
+
+    font-size: 0.7rem;
+}
+
+.logo-upload-box input {
+    display: none;
+}
+
+
+/* ==================================
+   EDIT BUTTONS
+================================== */
+
+.btn-save-team,
+.btn-cancel {
+    width: 100%;
+
+    min-height: 51px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    font-size: 0.9rem;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+}
+
+
+.btn-save-team {
+    margin-top: 8px;
+
+    border: 0;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple-main),
+            var(--purple-bright)
+        );
+}
+
+.btn-save-team:hover {
+    opacity: 0.92;
+}
+
+
+.btn-cancel {
+    margin-top: 12px;
+
+    box-sizing: border-box;
+
+    border:
+        1px solid var(--gold);
+
+    background: transparent;
+
+    color: var(--purple-dark);
+
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    background:
+        rgba(231, 201, 137, 0.12);
+
+    color: var(--purple-dark);
+}
+
+
+/* ==================================
+   DEFAULT SIDE PANEL
+================================== */
+
+.empty-edit-message {
+    margin: 0;
+
+    line-height: 1.6;
+
+    color: #5c4e62;
+}
+
+
+/* ==================================
+   HELP MESSAGE
+================================== */
+
+.standings-help {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 13px;
+
+    margin-top: 22px;
+
+    color: #54435a;
+}
+
+.standings-help p {
+    margin: 0 0 4px;
+}
+
+.help-icon {
+    width: 24px;
+    height: 24px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border:
+        2px solid var(--purple-main);
+
+    border-radius: 50%;
+
+    color: var(--purple-main);
+
+    font-weight: 800;
+}
+
+
+/* ==================================
+   RESPONSIVE
+================================== */
+
+@media (max-width: 1150px) {
+
+    .standings-admin-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-team-card {
+        max-width: none;
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .manage-standings-page {
+        padding:
+            28px 18px
+            50px;
+    }
+
+    .manage-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .manage-heading-actions {
+        width: 100%;
+
+        flex-wrap: wrap;
+    }
+
+    .btn-add-team,
+    .btn-save {
+        flex: 1;
+    }
+
+    .manage-standings-table {
+        min-width: 900px;
+    }
+}
+
+
+@media (max-width: 550px) {
+
+    .manage-heading h1 {
+        font-size: 1.9rem;
+    }
+
+    .logo-edit-area {
+        grid-template-columns: 1fr;
+    }
+
+    .manage-heading-actions {
+        flex-direction: column;
+    }
+
+    .btn-add-team,
+    .btn-save {
+        width: 100%;
+
+        box-sizing: border-box;
+    }
+}
+
+
+.delete-team-form {
+    margin: 0;
+}
+
+
+/* Edit button */
+.btn-edit-team {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px 10px;
+
+    border: 1px solid #36003f;
+    border-radius: 6px;
+
+    background-color: transparent;
+    color: #36003f;
+
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    min-width: 60px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.btn-edit-team:hover {
+    background-color: #36003f;
+    color: white;
+}
+
+
+/* Delete button */
+.btn-delete-team {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 7px 14px;
+
+    border: 1px solid #b42318;
+    border-radius: 6px;
+
+    background-color: transparent;
+    color: #b42318;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.btn-delete-team:hover {
+    background-color: #b42318;
+    color: white;
+}

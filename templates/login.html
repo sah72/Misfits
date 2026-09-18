@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Misfits Login</title>
+
+  <!-- Bootstrap first so your custom CSS can override it -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Sports-style heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared site styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  />
+
+  <!-- Login page styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/login.css') }}"
+  />
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+      <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"/>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a href="{{ url_for('standings') }}">Standings</a></li>
+    </ul>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}"> Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}"> Manage Standings</a>
+            <a href="#">Edit Stats</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+        Login
+    </a>
+
+{% endif %}
+  </nav>
+
+  <main class="login-page">
+
+    <!-- Decorative background -->
+    <section class="login-hero" aria-label="Login to Misfits Hockey">
+      <img
+        class="login-bg-img"
+        src="{{ url_for('static', filename='images/pucks.png') }}"
+        alt="Hockey pucks on ice"
+      />
+      <div class="login-overlay"></div>
+
+      <div class="login-shell">
+
+        <!-- Left side brand panel -->
+        <section class="login-brand-panel">
+          <img
+            class="login-team-logo"
+            src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"
+            alt="Misfits Hockey logo"
+          />
+
+          <p class="eyebrow">Team Portal</p>
+          <h1>Welcome Back</h1>
+
+          <p class="brand-copy">
+            Sign in to manage games, schedule, roster and standings for the Misfits.
+          </p>
+
+          <div class="brand-divider" aria-hidden="true">
+            <span></span>
+            <span class="stick-icon">⌯</span>
+            <span></span>
+          </div>
+
+          <div class="brand-mini-stats">
+            <div>
+              <strong class="season-text">{{selected_season.name}}</strong>
+              
+            </div>
+            <div>
+              <strong>{{roster_count}}</strong>
+              <span>Players</span>
+            </div>
+            <div>
+              <strong>{{points}}</strong>
+              <span>Points</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Login card -->
+        <section class="login-card">
+          <div class="login-card-heading">
+            <span class="section-icon">▣</span>
+            <div>
+              <h2>Login</h2>
+              <p>Access your Misfits Hockey account</p>
+            </div>
+          </div>
+
+          
+          <form class="login-form" method="POST" action="{{ url_for('login') }}">
+            <!-- Uncomment this if you use Flask-WTF -->
+            {# {{ form.hidden_tag() }} #}
+             <input
+               type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}"
+             >
+{% with messages = get_flashed_messages(category_filter=["error"]) %}
+    {% if messages %}
+        <div class="login-error" role="alert">
+            <span aria-hidden="true">⚠</span>
+
+            <p>{{ messages[0] }}</p>
+        </div>
+    {% endif %}
+{% endwith %}
+
+
+            <div class="form-group">
+              <label for="username">Email Address</label>
+              <div class="input-wrap">
+                <span aria-hidden="true">✉</span>
+                <input
+                  id="username"
+                  name="username"
+                  type="email"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrap">
+                <span aria-hidden="true">●</span>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  required
+                />
+              </div>
+            </div>
+
+            <button class="submit-login" type="submit">
+              Sign In
+            </button>
+          </form>
+        </section>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    &copy; 2026 Misfits. All Rights Reserved
+  </footer>
+
+</body>
+</html>

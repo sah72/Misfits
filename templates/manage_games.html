@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Misfits Login</title>
+
+  <!-- Bootstrap first so your custom CSS can override it -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Sports-style heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared site styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  />
+
+  <!-- Login page styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/manage_games.css') }}"
+  />
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+      <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"alt="Misfits Logo"/>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a href="{{ url_for('standings') }}">Standings</a></li>
+    </ul>
+
+  <div class="nav_actions">
+    <!--Season dropdown-->
+    <details class="user-menu">
+        <summary class="loginButton">
+            {{selected_season.name}}
+        </summary>
+
+        <div class="user-dropdown"> 
+            {%for season in all_seasons %}
+            <a href="{{ url_for(
+                'change_season',
+                season_id=season.id,
+                next=request.path
+            ) }}">
+                {{ season.name }}
+            </a> 
+            {%endfor %}      
+        </div>
+    </details>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}"> Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}"> Manage Standings</a>
+            <a href="#">Edit Stats</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+       Login
+    </a>
+
+{% endif %}
+  </nav>
+
+  <div class="admin-page">
+
+    <!-- Page Header -->
+    <div class="admin-header">
+        <div>
+            <h1>Manage Games</h1>
+            <p>Add, update, and remove games from the schedule.</p>
+        </div>
+
+        <a class="add-game-btn" href="{{url_for('manage_games', add=1)}}">
+            + Add New Game
+        </a>
+    </div>
+
+
+    <div class="game-admin-layout">
+
+        <!-- =========================
+             GAME LIST
+        ========================== -->
+        <section class="game-list-card">
+
+            <div class="game-table">
+
+                <!-- Table Header -->
+                <div class="game-row game-header-row">
+                    <span>Date</span>
+                    <span>Opponent</span>
+                    <span>Time</span>
+                    <span>Location</span>
+                    <span>Type</span>
+                    <span>Result</span>
+                    <span>Score</span>
+                    <span>Actions</span>
+                </div>
+
+{% for game in games %}
+
+    <div class="game-row">
+
+        <span>{{ game.date |convert_date(None) }}</span>
+
+        <div class="opponent">
+                        <img
+                            src="{{ url_for('static', filename=game.opp_logo)}}"
+                            alt="Opponent"
+                        >
+                        <span>{{game.opponent}}</span>
+                    </div>
+
+        <span>{{ game.Time_.strftime('%I:%M %p').lstrip('0')}}</span>
+
+        <span>{{ game.location }}</span>
+
+        <span>{{ game.game_type }}</span>
+
+        <span span class="result {{game.Result}}">
+            {{ game.Result if game.Result else "—" }}
+        </span>
+
+        <span>
+            {% if game.score_team is not none %}
+                {{ game.score_team }} - {{ game.score_opponent }}
+            {% else %}
+                —
+            {% endif %}
+        </span>
+
+        
+                    <div class="game-actions">
+                        <a href="{{ url_for('manage_games', edit=game.game_id) }}"
+                         class="edit-btn">
+                            Edit
+                        </a>
+
+                        <!-- <form method="POST"
+                        action="{{ url_for('delete_game', game_id=game.game_id) }}"> -->
+                         <!-- onsubmit="return confirm(
+            'Delete game vs {{ game.opponent }} on {{ game.date | convert_date(None) }}?'
+         )" -->
+    
+    <button 
+    type="button"
+    class="delete-btn"
+    onclick="document.getElementById('delete-modal-{{ game.game_id }}').showModal()">
+        Delete
+    </button>
+   <!-- </form> -->
+</div>
+                       
+
+    </div>
+    <dialog
+    class="delete-modal"
+    id="delete-modal-{{ game.game_id }}"
+>
+    <div class="delete-modal-header">
+        <h2>Delete Game?</h2>
+
+        <form method="dialog">
+            <button
+                type="submit"
+                class="modal-close"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+        </form>
+    </div>
+
+    <p class="delete-message">
+        Are you sure you want to remove this game from the schedule?
+    </p>
+
+    <div class="delete-game-details">
+
+        <div class="delete-opponent">
+            <img
+                src="{{ url_for('static', filename=game.opp_logo or 'images/default_logo.png') }}"
+                alt="{{ game.opponent }}"
+            >
+
+            <div>
+                <span class="detail-label">Opponent</span>
+                <strong>{{ game.opponent }}</strong>
+            </div>
+        </div>
+
+        <div class="detail-row">
+            <span>Date</span>
+            <strong>
+                {{ game.date.strftime('%B %d, %Y') }}
+            </strong>
+        </div>
+
+        <div class="detail-row">
+            <span>Time</span>
+            <strong>
+                {{ game.Time_.strftime('%I:%M %p').lstrip('0') }}
+            </strong>
+        </div>
+
+        <div class="detail-row">
+            <span>Location</span>
+            <strong>{{ game.location }}</strong>
+        </div>
+
+        <div class="detail-row">
+            <span>Type</span>
+            <strong>{{ game.game_type }}</strong>
+        </div>
+
+        <div class="detail-row">
+            <span>Status</span>
+            <strong>{{ game.Result or 'TBD' }}</strong>
+        </div>
+
+    </div>
+
+    <p class="delete-warning">
+        ⚠ This action cannot be undone.
+    </p>
+
+    <div class="delete-modal-actions">
+
+        <form method="dialog">
+            <button
+                type="submit"
+                class="modal-cancel-btn"
+            >
+                Cancel
+            </button>
+        </form>
+
+        <form
+            method="POST"
+            action="{{ url_for('delete_game', game_id=game.game_id) }}"
+        >
+            <button
+                type="submit"
+                class="modal-delete-btn"
+            >
+                Delete Game
+            </button>
+        </form>
+
+    </div>
+
+</dialog>
+
+{% endfor %}
+</div>
+</section>
+
+
+        <!-- =========================
+             EDIT / ADD GAME PANEL
+        ========================== -->
+        <aside class="edit-game-card"
+            data-manage-url="{{ url_for('manage_games') }}">
+           
+         <!-- Neutral state -->
+    <div id="default-game-panel"
+         {% if add_mode or selected_game %}hidden{% endif %}>
+
+        <div class="edit-card-header">
+            <h2>Manage Games</h2>
+        </div>
+
+        <div class="no-game-selected">
+            <p>Select a game to edit or add a new game.</p>
+        </div>
+
+    </div>
+        {%if add_mode %}
+        <div id="add-game-panel">
+          
+
+    <form method="POST" action="{{ url_for('add_game') }}">
+<div class="edit-card-header">
+    <h2>Add Game</h2>
+</div>
+        <!-- <h1>Add Game</h1> -->
+    <div class="form-group">
+        <label>Date</label>
+        <input
+            type="date"
+            name="date"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label>Time</label>
+        <input
+            type="time"
+            name="time"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label>Opponent</label>
+
+        <select name="opponent" required>
+            <option value="" selected disabled>
+                Select opponent
+            </option>
+            {%for team in teams%}
+                {% if team.Team != "Misfits" %}
+                    <option value= "{{ team.Team}}">
+                         {{ team.Team}}
+                    </option>
+                {%endif%}
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Location</label>
+
+        <input
+            type="text"
+            name="location"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label>Game Type</label>
+
+        <select name="game-type">
+            <option value="Regular Season">
+                Regular Season
+            </option>
+
+            <option value="Playoff">
+                Playoff
+            </option>
+             <option value ="Championship">
+                Championship
+            </option>
+                   
+        </select>
+    </div>
+
+    <button type="submit" class="save-btn">
+        Add Game
+    </button>
+
+    <button
+                type="button"
+                class="cancel-btn cancel-game-action"
+            >
+                Cancel
+            </button>
+
+    </form>
+</div>
+
+    {% elif selected_game is not none %}
+    <div id="edit-game-panel">
+                  
+            <div class="edit-card-header">
+                <h2>Edit Game</h2>
+            </div>
+
+
+            <form method="POST"
+            action="{{ url_for('edit_game', game_id=selected_game.game_id) }}">
+
+                <div class="form-group">
+                    <label for="game-date">
+                        Date
+                    </label>
+
+                    <input
+                        id="game-date"
+                        type="date"
+                        name="game-date"
+                        value="{{selected_game.date}}"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="game-time">
+                        Time
+                    </label>
+
+                    <input
+                        id="game-time"
+                        type="time"
+                        name="game-time"
+                        value="{{ selected_game.Time_.strftime('%H:%M') }}"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="opponent">
+                        Opponent
+                    </label>
+
+                    <select id="opponent" name="opponent">
+                        <!-- Current opponent -->
+                        <option value="{{ selected_game.opponent }}" selected>
+                             {{ selected_game.opponent }}
+                        </option>
+
+                        {%for team in teams%}
+                            {% if team.Team != "Misfits" and team.Team!=selected_game.opponent %}
+                            <option value= "{{ team.Team}}">
+                                {{ team.Team}}
+                            </option>
+                            {%endif%}
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="location">
+                        Location
+                    </label>
+
+                    <input
+                        id="location"
+                        type="text"
+                        placeholder="Arena"
+                        name="location"
+                        value ={{selected_game.location}}
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="game-type">
+                        Game Type
+                    </label>
+
+                    <select id="game-type" name="game-type">
+                        <option value ="Regular Season" {% if selected_game.game_type == "Regular Season" %}selected{% endif %}>
+                            Regular Season</option>
+                        <option value ="Playoff" {% if selected_game.game_type == "Playoff" %}selected{% endif %}>
+                            Playoff</option>
+                        <option value ="Championship" {% if selected_game.game_type == "Championship" %}selected{% endif %}>Championship</option>
+                    </select>
+                </div>
+
+
+                <!-- Scores beside each other -->
+                <div class="score-fields">
+
+                    <div class="form-group">
+                        <label for="score-team">
+                            Team Score
+                        </label>
+
+                        <input
+                            id="score-team"
+                            type="number"
+                            min="0"
+                            name="score-team"
+                            value={{selected_game.score_team}}
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="opponent-score">
+                            Opponent Score
+                        </label>
+
+                        <input
+                            id="opponent-score"
+                            type="number"
+                            min="0"
+                            name="opponent-score"
+                            value={{selected_game.score_opponent}}
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+                    <label for="result">
+                        Result
+                    </label>
+
+                    <select id="result" name="result">
+                       <option value="TBD"
+        {% if selected_game.Result == "TBD" %}selected{% endif %}>
+        TBD
+    </option>
+
+    <option value="Win"
+        {% if selected_game.Result == "Win" %}selected{% endif %}>
+        Win
+    </option>
+
+    <option value="Loss"
+        {% if selected_game.Result == "Loss" %}selected{% endif %}>
+        Loss
+    </option>
+    <option value="Tie"
+        {% if selected_game.Result == "Tie" %}selected{% endif %}>
+        Tie
+    </option>
+                    </select>
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="save-btn"
+                >
+                    Save Changes
+                </button>
+
+                <a href="{{ url_for('manage_games') }}"
+                    class="cancel-btn">
+                    Cancel
+                </a>
+
+            </form>
+            </div>
+
+        {% endif %}
+    </aside>
+
+    </div> 
+
+</div>
+
+
+<script>
+    //Change the Manage game right panel without refreshing the page.
+    document.querySelectorAll(".cancel-game-action").forEach(button => {
+
+        button.addEventListener("click", function () {
+
+            const addPanel = document.getElementById("add-game-panel");
+            const editPanel = document.getElementById("edit-game-panel");
+            const defaultPanel = document.getElementById("default-game-panel");
+
+            if (addPanel) {
+                addPanel.hidden = true;
+            }
+
+            if (editPanel) {
+                editPanel.hidden = true;
+            }
+
+            defaultPanel.hidden = false;
+
+            // Remove ?edit= or ?add= from the URL without refreshing
+            const manageUrl =
+                document.querySelector(".edit-game-card").dataset.manageUrl;
+
+            window.history.replaceState({}, "", manageUrl);
+        });
+
+    });
+</script>
+</body>

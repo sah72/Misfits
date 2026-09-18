@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Misfits Standings</title>
+
+  <!-- Bootstrap first so your custom CSS can override it -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Sports-style heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared site styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  />
+
+  <!-- Standings page styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/standings.css') }}"
+  />
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+      <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"/>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a class="active" href="{{ url_for('standings') }}">Standings</a></li>
+      </ul>
+
+    <!--Check if user is admin-->
+    <div class="nav_actions">
+    <!--Season dropdown-->
+    <details class="user-menu">
+        <summary class="loginButton">
+            {{selected_season.name}}
+        </summary>
+
+        <div class="user-dropdown"> 
+            {%for season in all_seasons %}
+            <a href="{{ url_for(
+                'change_season',
+                season_id=season.id,
+                next=request.path
+            ) }}">
+                {{ season.name }}
+            </a> 
+            {%endfor %}      
+        </div>
+    </details>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}"> Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}"> Manage Standings</a>
+            <a href="#">Edit Stats</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+        Login
+    </a>
+
+{% endif %}
+  </nav>
+
+  <!-- Standings Hero -->
+  <section class="standings-hero">
+    <img
+      class="standings-hero-img"
+      src="{{ url_for('static', filename='images/pucks.png') }}"
+      alt="Hockey pucks on ice"
+    />
+
+    <div class="standings-hero-overlay"></div>
+
+    <div class="standings-hero-content">
+      <h1>Standings</h1>
+      <p>{{selected_season.name}}</p>
+
+      <div class="hero-divider" aria-hidden="true">
+        <span></span>
+        <span class="stick-icon">⌯</span>
+        <span></span>
+      </div>
+    </div>
+  </section>
+
+  <main class="standings-page">
+
+    <!-- Team Standing Summary -->
+    <section class="standings-summary-card">
+      <div class="summary-logo-wrap">
+        <img
+          class="summary-logo"
+          src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"
+          alt="Misfits Hockey logo"
+        />
+      </div>
+
+      <div class="team-rank">
+        <strong>{{team.rank|default("TBD",true)}}</strong>
+        <span>In the League</span>
+      </div>
+
+      <div class="summary-metric">
+        <span>Record</span>
+        <strong> {{ team.Wins ~ "-" ~ team.Loss ~ "-" ~ team.OT_Loss if team is not none else "0-0-0" }}</strong>
+        <small>W-L-OT</small>
+      </div>
+
+      <div class="summary-metric">
+        <span>Points</span>
+        <strong>{{team.Points|default(0,true)}}</strong>
+        <small>PTS</small>
+      </div>
+
+
+      <div class="summary-metric streak-metric">
+
+    <span class="streak-label">
+        Current Streak
+    </span>
+
+    {% if streak and streak.result %}
+
+        <strong class="streak-value streak-{{ streak.result }}">
+            {{ streak.result[0] | upper }}{{ streak.count }}
+        </strong>
+
+        <small class="streak-description">
+            {{ streak.result }} Streak
+        </small>
+
+    {% else %}
+
+        <strong class="streak-value">—</strong>
+
+        <small class="streak-description">
+            No games played
+        </small>
+
+    {% endif %}
+
+</div>
+      <!-- <div class="summary-metric">
+        <span>Current Streak</span>
+        {%if streak.result%}
+        <strong class="streak-{{streak.result}}">{{streak.result[0]}} {{ streak.count }} </strong>
+        <small>{{streak.result}} Streak</small>
+        {%else%}
+        <strong>—</strong>
+        <small>No games played</small>
+        {%endif%}
+      </div> -->
+
+      
+<div class="next-opponent-card">
+
+    <div class="next-opponent-content">
+
+        <!-- Opponent information -->
+        <div class="next-opponent-info">
+
+            <span class="next-label">
+                Next Opponent
+            </span>
+
+            <p>
+                vs
+                <strong>
+                    {{ page.oppon if page else 'TBD' }}
+                </strong>
+            </p>
+
+            <small>
+                📅 {{ page.date if page else 'TBD' }}
+            </small>
+
+            <small>
+                📍 {{ page.loc if page else 'TBD' }}
+            </small>
+
+        </div>
+
+        <!-- Opponent Logo -->
+        <img
+            class="next-opponent-logo"
+            src="{{ url_for(
+                'static',
+                filename=page.oppo_logo
+                if page and page.oppo_logo
+                else 'images/tbd.png'
+            ) }}"
+            alt="{{ page.oppon if page else 'Opponent' }} logo"
+        >
+
+    </div>
+
+</div>
+
+     
+    </section>
+
+    <!-- Main Content -->
+    <section class="standings-layout">
+
+      <!-- League Standings Table -->
+      <section class="standings-table-card">
+        <div class="table-toolbar">
+          <div class="standings-tabs">
+            <button class="active" type="button">League</button>
+ 
+          </div>
+
+          <button class="season-button" type="button">
+            <span>📅 {{selected_season.name}}</span>
+            <!-- <span aria-hidden="true">⌄</span> -->
+          </button>
+        </div>
+
+        <div class="table-scroll">
+          <table id="standings_table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th><a
+                  href="{{ url_for(
+                    'standings',
+                    sort='team',
+                    order='asc' if sort_by == 'team' and sort_order == 'desc' else 'desc'
+                    ) }}">Team 
+                  {% if sort_by == "team" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a>
+                </th>
+                <th>GP</th>
+                <th> 
+                  <a href="{{ url_for(
+                    'standings',
+                    sort='wins',
+                    order='asc' if sort_by == 'wins' and sort_order == 'desc' else 'desc'
+                    ) }}">
+                    W
+                     {% if sort_by == "wins" %}
+            <span class="sort-arrow">
+                {{ "▼" if sort_order == "desc" else "▲" }}
+            </span>
+            {% else %}
+    <span class="sort-arrow">⇅</span>
+        {% endif %}
+                  </a>
+                </th>
+                <th><a
+                  href="{{ url_for(
+                    'standings',
+                    sort='losses',
+                    order='asc' if sort_by == 'losses' and sort_order == 'desc' else 'desc'
+                    ) }}">L  {% if sort_by == "losses" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a></th>
+                <th>
+                  <a
+                  href="{{ url_for(
+                    'standings',
+                    sort='tie',
+                    order='asc' if sort_by == 'tie' and sort_order == 'desc' else 'desc'
+                    ) }}">T {% if sort_by == "tie" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a>
+                </th>
+                <th><a
+                  href="{{ url_for(
+                    'standings',
+                    sort='otl',
+                    order='asc' if sort_by == 'otl' and sort_order == 'desc' else 'desc'
+                    ) }}">OT  {% if sort_by == "otl" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a></th>
+                <th><a
+                  href="{{ url_for(
+                    'standings',
+                    sort='goals_for',
+                    order='asc' if sort_by == 'goals_for' and sort_order == 'desc' else 'desc'
+                    ) }}">GF  {% if sort_by == "goals_for" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a></th>
+                <th><a
+                  href="{{ url_for(
+                    'standings',
+                    sort='goals_again',
+                    order='asc' if sort_by == 'goals_again' and sort_order == 'desc' else 'desc'
+                    ) }}">GA {% if sort_by == "goals_again" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a></th>
+                      <th><a
+                  href="{{ url_for(
+                    'standings',
+                    sort='pim',
+                    order='asc' if sort_by == 'pim' and sort_order == 'desc' else 'desc'
+                    ) }}">PIM  {% if sort_by == "pim" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a></th>
+                <th><a
+                  href="{{ url_for(
+                    'standings',
+                    sort='points',
+                    order='asc' if sort_by == 'points' and sort_order == 'desc' else 'desc'
+                    ) }}">PTS {% if sort_by == "points" %}
+                    <span class="sort-arrow">
+                        {{ "▼" if sort_order == "desc" else "▲" }}
+                    </span>
+                    {% else %}
+    <span class="sort-arrow">⇅</span>
+                {% endif %}</a></th>
+              </tr>
+            </thead>
+
+            <tbody>
+<tbody>
+  {%if current_stand %}
+
+  {% for pos in current_stand %}
+    <tr class="{% if pos.Team in ['Misfits', 'Misfits Hockey'] %}highlight-team{% endif %}">
+      <td>{{ pos.rank }}</td>
+
+        <td><!--Team badges-->
+          <div class="team-cell">
+                  
+                    <img
+                                            src="{{ url_for(
+                                                'static',
+                                                filename=pos.logo
+                                            ) }}"
+                                            alt="{{ team.Team }} logo"
+                                            class="team-badge"
+                                        />
+                    
+                    <strong>{{pos.Team}}</strong>
+                  
+            </div>
+          </td>
+
+
+      <td>{{pos.Games_Played}}</td>
+      <td>{{pos.Wins}}</td>
+      <td>{{pos.Loss}}</td>
+      <td>{{pos.Ties}}</td>
+      <td>{{pos.OT_Loss}}</td>
+      <td>{{pos.Goals_For}}</td>
+      <td>{{pos.Goals_Against}}</td>
+      <td>{{pos.Pim}}</td>
+      <td>{{pos.Points}}</td>
+
+
+  {% else %}
+    <tr>
+      <td colspan="10">No standings are currently available.</td>
+    </tr>
+  {% endfor %}
+  {%endif%}
+</tbody>
+
+
+
+            
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="standings-sidebar">
+
+        
+<section class="side-card">
+
+  <div class="side-heading">
+    <span>🏆</span>
+    <h2>Recent Results</h2>
+  </div>
+
+  <!-- Previous Results -->
+  {% if curr_schd %}
+
+  <div class="result-list">
+
+    {% for game in curr_schd %}
+
+    <div class="result-item">
+
+      <!-- Top row: Result and Date -->
+      <div class="result-meta">
+
+        <span class="result-mark result-mark-{{ game.Result[0]|upper }}">
+          {{ game.Result }}
+         
+        </span>
+
+        <small class="result-date">
+          {{ game.date|convert_date(None) }}
+        </small>
+
+      </div>
+
+      <!-- Bottom row: Logos and Score -->
+      <div class="result-matchup">
+
+        <!-- Misfits Logo -->
+        <img
+          src="{{ url_for('static', filename=team.logo) }}"
+          alt="{{ team.Team }} logo"
+          class="team-badge"
+        >
+
+        <!-- Score -->
+        <div class="result-score">
+          <strong>
+            {{ game.score_team }} - {{ game.score_opponent }}
+          </strong>
+          <small>FINAL</small>
+        </div>
+
+        <!-- Opponent Logo -->
+        <img
+          src="{{ url_for('static', filename=game.opp_logo) }}"
+          alt="{{ game.opponent }} logo"
+          class="team-badge"
+        >
+
+      </div>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+  {% else %}
+
+  <p class="no-results">
+    No recent results available.
+  </p>
+
+  {% endif %}
+
+  <a class="side-link" href="{{ url_for('schedule') }}">
+    View Full Schedule &rarr;
+  </a>
+
+</section>
+
+        <section class="side-card">
+          <div class="side-heading">
+            <span>★</span>
+            <h2>Team Leaders</h2>
+          </div>
+
+          {%if lead %}
+          <div class="leader-list">
+            <div class="leader-item">
+              <span>Points</span>
+              <strong>{{lead.points.name}} <small>(MIS)</small></strong>
+              <em>{{lead.points.value}} PTS</em>
+            </div>
+
+            <div class="leader-item">
+              <span>Goals</span>
+              <strong>{{lead.goals.name}}  <small>(MIS)</small></strong>
+              <em>{{lead.goals.value}}  G</em>
+            </div>
+
+            <div class="leader-item">
+              <span>Assists</span>
+              <strong>{{lead.assists.name}} <small>(MIS)</small></strong>
+              <em>{{lead.assists.value}} A</em>
+            </div>
+
+            <div class="leader-item">
+              <span>Shutouts</span>
+              <strong>{{lead.shut.name}} <small>(MIS)</small></strong>
+              <em>{{lead.shut.value}}</em>
+            </div>
+          </div>
+
+          <a class="side-link" href="{{ url_for('roster') }}">View Roster Stats ›</a>
+        </section>
+        {%endif%}
+
+      </aside>
+    </section>
+
+    <!-- Bottom Note -->
+    <section class="standings-note">
+      <div class="note-icon" aria-hidden="true">ⓘ</div>
+      <div>
+        <h3>A 6 team playoffs</h3>
+        <p>Tiebreakers: Points → Wins → Head-to-head → Goal differential → Goals for.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    &copy; 2026 Misfits. All Rights Reserved
+  </footer>
+
+<script
+    src="{{ url_for('static', filename='js/standings.js') }}"
+    defer>
+</script>
+  
+</body>
+
+
+</html>

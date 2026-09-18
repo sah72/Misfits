@@ -1,0 +1,656 @@
+:root {
+      --misfits-purple: #330039;
+      --misfits-purple-2: #4a0057;
+      --misfits-gold: #f3d36b;
+      --misfits-orange: #ff8a3d;
+      --misfits-cream: #fff4e3;
+      --misfits-cream-2: #fffaf2;
+      --misfits-page: #fbf7ef;
+      --misfits-border: #d8c2a5;
+      --misfits-text: #18001d;
+      --misfits-muted: #6f5a72;
+      --misfits-shadow: 0 16px 34px rgba(51, 0, 57, 0.14);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(51, 0, 57, 0.07), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, var(--misfits-page) 44%, #f7efe3 100%);
+      color: var(--misfits-text);
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    * Navigation */
+/* Navigation */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  min-height: 90px;
+  background: linear-gradient(90deg, var(--purple-dark), var(--purple-main));
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: center;
+  padding: 0 48px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--cream);
+  text-decoration: none;
+}
+
+.nav-logo:hover {
+  color: var(--cream);
+}
+
+.logo-badge {
+  width: 128px;
+  height: auto;
+  padding: 10px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 0.95;
+  font-family: "Oswald", sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 88px;
+  margin: 0;
+  padding: 0;
+  font-family: "Oswald", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.nav-links a {
+  color: var(--cream);
+  text-decoration: none;
+  padding: 31px 0 24px;
+  display: inline-block;
+  position: relative;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--gold);
+}
+
+.nav-links a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 19px;
+  width: 100%;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 999px;
+}
+.nav_actions {
+        display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    width: auto;
+    flex-wrap: nowrap;
+
+}
+
+.loginButton {
+     
+     display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+
+    padding: 14px 14px;
+
+    background-color: #fff4df;
+    color: #2b0038;
+
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+
+    transition: all 0.2s ease;
+
+}
+
+.loginButton:hover {
+  /* opacity: 0.85; */
+     background-color: #d4af37;
+    color: #2b0038;
+
+    transform: translateY(-2px);
+}
+    
+
+    .preview-page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 30px 60px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: var(--misfits-purple);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .back-link:hover {
+      color: var(--misfits-purple-2);
+      text-decoration: underline;
+    }
+
+    .preview-title {
+      font-family: "Oswald", sans-serif;
+      text-transform: uppercase;
+      font-size: 2.35rem;
+      margin-bottom: 18px;
+      color: var(--misfits-purple);
+      letter-spacing: 0.5px;
+    }
+
+    .preview-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .preview-main {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .matchup-card,
+    .preview-card,
+    .sidebar-card {
+      background: var(--misfits-cream-2);
+      border: 1px solid var(--misfits-border);
+      border-radius: 10px;
+      box-shadow: var(--misfits-shadow);
+      color: var(--misfits-text);
+    }
+
+    .matchup-card {
+      padding: 24px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .matchup-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(51, 0, 57, 0.05), transparent 35%, rgba(243, 211, 107, 0.16)),
+        radial-gradient(circle at 15% 18%, rgba(51, 0, 57, 0.09), transparent 28%);
+      pointer-events: none;
+    }
+
+    .matchup-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-badge {
+      display: inline-block;
+      background: var(--misfits-purple);
+      color: var(--misfits-cream);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      box-shadow: 0 8px 18px rgba(51, 0, 57, 0.22);
+    }
+
+    .matchup-date {
+      text-align: center;
+      margin-top: -10px;
+    }
+
+    .matchup-date p {
+      margin: 0;
+      text-transform: uppercase;
+      color: var(--misfits-purple);
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+
+    .matchup-date h2 {
+      margin: 6px 0 0;
+      color: var(--misfits-purple);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .teams-row {
+      display: grid;
+      grid-template-columns: 1fr 95px 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-top: 22px;
+      width:100%;
+    }
+
+    .team-block {
+      display: flex;
+      text-align: center;
+      flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    }
+
+    .team-logo {
+      width: 145px;
+      height: 145px;
+      object-fit: contain;
+      display: block;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 8px 12px rgba(51, 0, 57, 0.15));
+    }
+
+    .team-block h3 {
+      font-family: "Oswald", sans-serif;
+      text-transform: uppercase;
+      text-align: center;
+      font-size: 1.65rem;
+      margin: 0;
+      color: var(--misfits-purple);
+    }
+
+    .vs-block {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .vs-block span {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--misfits-border);
+      background: var(--misfits-cream);
+      color: var(--misfits-purple);
+      font-family: "Oswald", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .final-score {
+      font-family: "Oswald", sans-serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--misfits-purple);
+    }
+
+    .matchup-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px solid var(--misfits-border);
+    }
+
+    .matchup-meta > div {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .meta-icon {
+      font-size: 1.5rem;
+    }
+
+    .matchup-meta strong {
+      display: block;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+      color: var(--misfits-purple);
+    }
+
+    .matchup-meta p {
+      margin: 4px 0 0;
+      color: var(--misfits-muted);
+    }
+
+    .preview-card {
+      padding: 20px 22px;
+    }
+
+    .preview-card h2,
+    .sidebar-card h2 {
+      font-family: "Oswald", sans-serif;
+      text-transform: uppercase;
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+      position: relative;
+      color: var(--misfits-purple);
+    }
+
+    .preview-card h2::after,
+    .sidebar-card h2::after {
+      content: "";
+      display: block;
+      width: 56px;
+      height: 3px;
+      background: var(--misfits-gold);
+      margin-top: 8px;
+    }
+
+    .overview-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .overview-card p {
+      color: var(--misfits-text);
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+
+    .record-box {
+      background: var(--misfits-purple);
+      border-radius: 8px;
+      padding: 18px;
+      text-align: center;
+      color: var(--misfits-cream);
+      box-shadow: inset 0 0 0 1px rgba(255, 244, 227, 0.12);
+    }
+
+    .record-number {
+      font-family: "Oswald", sans-serif;
+      color: var(--misfits-gold);
+      font-size: 2.45rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .record-label {
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--misfits-cream);
+      margin-bottom: 14px;
+    }
+
+    .attendance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 16px;
+    }
+
+    .attendance-legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+    }
+
+    .attendance-legend span {
+      background: var(--misfits-cream);
+      border: 1px solid var(--misfits-border);
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: var(--misfits-purple);
+      font-weight: 700;
+    }
+
+    .attendance-card h3 {
+      color: var(--misfits-purple);
+      text-transform: uppercase;
+      font-size: 0.95rem;
+      margin: 14px 0 8px;
+      font-weight: 800;
+    }
+
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px 12px;
+    }
+
+    .player-pill {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+      border: 1px solid var(--misfits-border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.95rem;
+      color: var(--misfits-text);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .confirmed {
+      background: #22c55e;
+    }
+
+    .maybe {
+      background: #f5c542;
+    }
+
+    .out {
+      background: #e5484d;
+    }
+
+    .attendance-note {
+      color: var(--misfits-muted);
+      font-size: 0.85rem;
+      margin-top: 14px;
+      margin-bottom: 0;
+    }
+
+    .preview-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-card {
+      padding: 20px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--misfits-border);
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-row span {
+      color: var(--misfits-muted);
+      font-weight: 700;
+    }
+
+    .detail-row strong {
+      text-align: right;
+      color: var(--misfits-purple);
+    }
+
+    .calendar-btn {
+      width: 100%;
+      border: 2px solid var(--misfits-purple);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-weight: 800;
+      background: var(--misfits-purple);
+      color: var(--misfits-cream);
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .calendar-btn:hover {
+      background: var(--misfits-cream);
+      color: var(--misfits-purple);
+    }
+
+    .previous-score {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .previous-logo {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+    }
+
+    .previous-score strong {
+      display: block;
+      font-family: "Oswald", sans-serif;
+      font-size: 2rem;
+      color: var(--misfits-purple);
+    }
+
+    .previous-score span {
+      display: block;
+      color: #22c55e;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .previous-score small {
+      color: var(--misfits-muted);
+      font-weight: 700;
+    }
+
+    .quick-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--misfits-text);
+      text-decoration: none;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--misfits-border);
+      font-weight: 700;
+    }
+
+    .quick-link:hover {
+      color: var(--misfits-purple);
+    }
+
+    .quick-link:last-child {
+      border-bottom: none;
+    }
+
+    @media (max-width: 1050px) {
+      .preview-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .overview-card {
+        grid-template-columns: 1fr;
+      }
+
+      .player-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .site-nav {
+        padding: 18px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a {
+        padding: 8px 0;
+      }
+
+      .preview-page {
+        padding: 24px 18px 44px;
+      }
+
+      .teams-row {
+        grid-template-columns: 1fr;
+      }
+
+      .final-score {
+        font-size: 2.4rem;
+      }
+
+      .matchup-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-sidebar {
+        grid-template-columns: 1fr;
+      }
+
+      .player-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .attendance-header {
+        flex-direction: column;
+      }
+    }
+    .calendar-icon {
+    font-size: 50px;
+    display: block;
+    margin-bottom: 8px;
+}

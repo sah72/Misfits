@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Misfits Schedule</title>
+
+  <!-- Bootstrap first so your custom CSS can override it -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Sports-style heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared site styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  />
+
+  <!-- Schedule page styles -->
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/schedule.css') }}"
+  />
+</head>
+
+<body>
+
+  <!-- Navigation: matches the enhanced home page structure -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+      <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"/>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a class="active" href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a href="{{ url_for('standings') }}">Standings</a></li>
+    </ul>
+
+    <!--Check if user is admin-->
+    <div class="nav_actions">
+    <!--Season dropdown-->
+    <details class="user-menu">
+        <summary class="loginButton">
+            {{selected_season.name}}
+        </summary>
+
+        <div class="user-dropdown"> 
+            {%for season in all_seasons %}
+            <a href="{{ url_for(
+                'change_season',
+                season_id=season.id,
+                next=request.path
+            ) }}">
+                {{ season.name }}
+            </a> 
+            {%endfor %}      
+        </div>
+    </details>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}">Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}">Manage Standings</a>
+            <a href="#">Edit Stats</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+        Login
+    </a>
+
+{% endif %}
+  </nav>
+
+  <!-- Schedule Hero -->
+  <section class="schedule-hero">
+    <img
+      class="schedule-hero-img"
+      src="{{ url_for('static', filename='images/pucks.png') }}"
+      alt="Hockey pucks on ice"
+    />
+
+    <div class="schedule-hero-overlay"></div>
+
+    <div class="schedule-hero-content">
+      <h1>Schedule</h1>
+      <p>{{selected_season.name}}</p>
+    </div>
+  </section>
+
+  <main class="schedule-page">
+
+    <!-- Next Game Feature Card -->
+    <section class="schedule-next-card">
+
+      <div class="next-game-label">
+        <span>Next</span>
+        <span>Game</span>
+        <div class="label-icon">⚡</div>
+      </div>
+
+      <div class="next-game-content">
+
+        <div class="next-team">
+          <img
+            class="next-team-logo"
+            src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"
+            alt="Misfits Hockey logo"
+          />
+          <p>Misfits Hockey</p>
+        </div>
+
+        <div class="next-game-details">
+          <p class="next-date">
+            {{ page.date if page else 'TBD' }}
+          </p>
+
+          <div class="vs-pill">VS</div>
+
+          <h2 class="next-opponent">
+            {{ page.oppon if page else 'TBD' }}
+          </h2>
+
+          <p class="next-location">
+            <span aria-hidden="true">📍</span>
+            <a href="{{ page.loc_link if page else '#' }}">
+              {{ page.loc if page else 'Iceland Arena Rink 3' }}
+            </a>
+          </p>
+        </div>
+
+        <div class="next-game-actions">
+          <div class="next-time">
+            <span class="calendar-icon" aria-hidden="true">📅</span>
+            <strong class="next-time_">{{ page.time_ if page and page.time_ else 'TBD' }}</strong>
+            <span>PM EDT</span>
+          </div>
+
+          {% if page.game_id%}
+          <a class="preview-btn" href="{{ url_for('game_preview', game_id=page.game_id) }}">Game Preview
+          </a>
+            <button type="button"id ="add-calendar-btn" class="calendar-btn">Add to Calendar</button>
+        </div>
+
+        <div class="next-team">
+          <img
+            class="next-team-logo"
+            src="{{ url_for('static', filename=page.oppo_logo if page and page.oppo_logo else 'images/default_logo.png') }}"
+            alt="{{ page.oppon if page else 'Opponent' }} logo"
+          />
+          <p>{{ page.oppon if page else 'Summer Pandas' }}</p>
+        </div>
+        {%endif%}
+
+      </div>
+    </section>
+
+    <!-- Filter Controls -->
+    <section class="schedule-toolbar" aria-label="Schedule filters">
+      <div class="filter-buttons">
+        <button class="active" data-filter="all">All Games</button>
+        <button data-filter="scheduled">Upcoming</button>
+        <button data-filter="final">Final</button>
+      </div>
+
+      <button class="season-button" type="button">
+        <span>📅 {{selected_season.name}}</span>
+        </button>
+    </section>
+
+    <!-- Schedule Table -->
+    <section class="schedule-table-card">
+      <table id="sched_table">
+        <thead>
+          <tr>
+            <th>
+              <button type="button" id="date-sort" class="sort-btn">
+                Date
+                <span id ="date-sort-arrow">↓</span>
+              </button>
+            </th>
+            <th>Opponent</th>
+            <th>Location</th>
+            <th>Time</th>
+            <th>Result</th>
+            <th>Status</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+
+        <!-- Content retrieved from the database / schedule.js -->
+        <tbody>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Bottom Note -->
+    <section class="schedule-note">
+      <div class="note-icon" aria-hidden="true">📅</div>
+      <div>
+        <h3>All times listed in EDT</h3>
+        <p>Schedule is subject to change. Check back regularly for updates.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    &copy; 2026 Misfits. All Rights Reserved
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+</body>
+</html>
