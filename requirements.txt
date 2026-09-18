@@ -16,5 +16,8 @@ Flask-WTF
 # Image handling
 Pillow
 
+# Production server
+gunicorn
+
 # Testing
 pytest
