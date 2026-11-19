@@ -342,39 +342,45 @@ body {
   font-weight: 900;
 }
 
+/* Player statistics - 4 columns */
 .player-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 16px;
-  padding-top: 10px;
-  border-top: 1px solid var(--roster-border);
-  text-align: center;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--roster-border);
+    text-align: center;
 }
 
 .player-stats div {
-  border-right: 1px solid var(--roster-border);
+    min-width: 0;
+    padding: 0 4px;
+    border-right: 1px solid var(--roster-border);
 }
 
 .player-stats div:last-child {
-  border-right: 0;
+    border-right: none;
 }
 
 .player-stats span {
-  display: block;
-  color: var(--roster-text);
-  font-size: 0.72rem;
-  font-weight: 900;
-  line-height: 1;
+    display: block;
+    color: var(--roster-text);
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .player-stats strong {
-  display: block;
-  margin-top: 4px;
-  color: var(--roster-purple-dark);
-  font-family: "Oswald", sans-serif;
-  font-size: 1.1rem;
-  line-height: 1;
+    display: block;
+    margin-top: 5px;
+    color: var(--roster-purple-dark);
+    font-family: "Oswald", sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.1;
 }
+
 
 .goalie-card .jersey-number {
   background: linear-gradient(180deg, #1d1730, var(--roster-purple-main));

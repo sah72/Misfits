@@ -217,13 +217,18 @@
 
 
             {% else %}
+            
             <div>
-              <span>PTS</span>
-              <strong>{{ player.Points or 0 }}</strong>
+              <span>G</span>
+              <strong>{{ player.Goals or 0 }}</strong>
             </div>
             <div>
               <span>AST</span>
               <strong>{{ player.Assists or 0 }}</strong>
+            </div>
+            <div>
+              <span>PTS</span>
+              <strong>{{ player.Points or 0 }}</strong>
             </div>
           </div>
           {%endif%}
