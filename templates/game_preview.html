@@ -132,7 +132,8 @@
 
           <div class="team-block">
             <img
-              src="{{ url_for('static', filename='images/misfits_logo.png') }}"
+              src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"
+              
               alt="Misfits logo"
               class="team-logo"
             >
@@ -279,34 +280,46 @@
       </section>
       {% endif %}
 
-      <section class="sidebar-card">
-        <h2>Previous Matchup</h2>
+     
+<section class="sidebar-card">
+    <h2>Previous Matchup</h2>
 
-        {% if prev %}
-        <div class="previous-score">
-          <img
-            src="{{ url_for('static', filename='images/misfits_logo.png') }}"
+    {% if prev %}
+    <div class="previous-score">
+
+        <img
+            src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"
             alt="Misfits logo"
             class="previous-logo"
-          >
+        >
 
-          <div>
-            <strong>{{ prev.score_team}}-{{prev.score_opponent}}</strong>
-            <span>{{  prev.Result  }}</span>
-            <small>{{ prev.date |convert_date(None) }}</small>
-          </div>
+        <div class="previous-score-info">
+            <strong>
+                {{ prev.score_team }}-{{ prev.score_opponent }}
+            </strong>
 
-          <img
-            src="{{ game.oppo_logo if game.oppo_logo is defined and game.oppo_logo else url_for('static', filename='images/default_logo.png') }}"
-            alt="{{ opponent }} logo"
-            class="previous-logo"
-          >
+            <span class="{{ (prev.Result or '') | lower }}">
+                {{ prev.Result }}
+            </span>
+
+            <small>
+                {{ prev.date | convert_date(None) }}
+            </small>
         </div>
-        {% else%}
+
+        <img
+            src="{{ url_for('static', filename=prev.opp_logo) }}"
+            alt="{{ prev.opponent }} logo"
+            class="previous-logo"
+        >
+
+    </div>
+    {% else %}
         <span class="calendar-icon">📅</span>
         <strong>No Previous Matchup</strong>
-        {% endif %}
-      </section>
+    {% endif %}
+</section>
+
 
       <section class="sidebar-card">
         <h2>Quick Links</h2>

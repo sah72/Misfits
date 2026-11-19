@@ -654,3 +654,97 @@
     display: block;
     margin-bottom: 8px;
 }
+
+
+
+/* Previous Matchup */
+.previous-score {
+    display: grid;
+    grid-template-columns: 65px minmax(0, 1fr) 65px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: center;
+    margin-top: 18px;
+}
+
+/* Team logos */
+.previous-logo {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    display: block;
+    justify-self: center;
+}
+
+/* Score, result and date */
+.previous-score-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+/* Final score */
+.previous-score strong {
+    font-family: "Oswald", sans-serif;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--misfits-purple);
+}
+
+/* Win / Loss / Tie */
+.previous-score span {
+    display: block;
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* Game date */
+.previous-score small {
+    display: block;
+    color: var(--misfits-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 3px;
+}
+
+/* Result colours */
+.previous-score .win {
+    color: #15803d;
+}
+
+.previous-score .loss {
+    color: #b91c1c;
+}
+
+.previous-score .tie {
+    color: #a16207;
+}
+
+/* Smaller screens */
+@media (max-width: 400px) {
+    .previous-score {
+        grid-template-columns: 50px minmax(0, 1fr) 50px;
+        gap: 6px;
+    }
+
+    .previous-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .previous-score strong {
+        font-size: 1.8rem;
+    }
+
+    .previous-score small {
+        font-size: 0.75rem;
+    }
+}
