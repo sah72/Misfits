@@ -168,12 +168,6 @@
                          class="edit-btn">
                             Edit
                         </a>
-
-                        <!-- <form method="POST"
-                        action="{{ url_for('delete_game', game_id=game.game_id) }}"> -->
-                         <!-- onsubmit="return confirm(
-            'Delete game vs {{ game.opponent }} on {{ game.date | convert_date(None) }}?'
-         )" -->
     
     <button 
     type="button"
@@ -272,6 +266,9 @@
             method="POST"
             action="{{ url_for('delete_game', game_id=game.game_id) }}"
         >
+         <input type="hidden"
+           name="csrf_token"
+           value="{{ csrf_token() }}">
             <button
                 type="submit"
                 class="modal-delete-btn"
@@ -313,6 +310,9 @@
           
 
     <form method="POST" action="{{ url_for('add_game') }}">
+         <input type="hidden"
+           name="csrf_token"
+           value="{{ csrf_token() }}">
 <div class="edit-card-header">
     <h2>Add Game</h2>
 </div>
@@ -404,6 +404,9 @@
 
             <form method="POST"
             action="{{ url_for('edit_game', game_id=selected_game.game_id) }}">
+             <input type="hidden"
+           name="csrf_token"
+           value="{{ csrf_token() }}">
 
                 <div class="form-group">
                     <label for="game-date">

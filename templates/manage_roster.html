@@ -1,0 +1,978 @@
+<!doctype html>
+
+
+
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Manage Roster</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/manage_roster.css') }}"
+    >
+
+</head>
+
+<body>
+
+<!-- Navigation -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="{{ url_for('home') }}" aria-label="Misfits Hockey home">
+      <img class="logo-badge" src="{{ url_for('static', filename='images/Misfits_Logo.png') }}"/>
+    </a>
+
+    <ul class="nav-links">
+      <li><a class="active" href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('roster') }}">Roster</a></li>
+      <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+      <li><a href="{{ url_for('standings') }}">Standings</a></li>
+    </ul>
+
+    <div class="nav_actions">
+    <!--Season dropdown-->
+    <details class="user-menu">
+        <summary class="loginButton">
+            {{selected_season.name}}
+        </summary>
+
+        <div class="user-dropdown"> 
+            {%for season in all_seasons %}
+            <a href="{{ url_for(
+                'change_season',
+                season_id=season.id,
+                next=request.path
+            ) }}">
+                {{ season.name }}
+            </a> 
+            {%endfor %}      
+        </div>
+    </details>
+
+    <!--Check if user is admin-->
+    {% if current_user.is_authenticated %}
+
+    <details class="user-menu">
+        <summary class="loginButton">
+            Admin
+        </summary>
+
+        <div class="user-dropdown">
+            <a href="{{ url_for('admin') }}">Dashboard</a>
+            <a href="{{ url_for('manage_games')}}"> Manage Games</a>
+            <a href="{{ url_for('manage_standings')}}"> Manage Standings</a>
+            <a href="{{ url_for('manage_roster')}}"> Manage Roster</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+
+{% else %}
+
+    <a href="{{ url_for('login', next=request.path) }}" class="loginButton">
+      Login
+    </a>
+
+{% endif %}
+</div>
+  </nav>
+
+
+<main class="roster-admin-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <header class="roster-page-header">
+
+        <div class="roster-title-area">
+
+            <h1>Manage Roster</h1>
+
+            <p>
+                {{ selected_season.name }} Season
+            </p>
+
+        </div>
+
+
+        <div class="roster-toolbar">
+
+            <!-- Search -->
+            <div class="roster-search">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    id="player-search"
+                    type="search"
+                    placeholder="Search players..."
+                    aria-label="Search players"
+                >
+
+            </div>
+
+
+            <!-- Position Filter -->
+            <select
+                id="position-filter"
+                class="position-filter"
+                aria-label="Filter by position"
+            >
+
+                <option value="all">
+                    All Positions
+                </option>
+
+                <option value="forward">
+                    Forwards
+                </option>
+
+                <option value="defense">
+                    Defense
+                </option>
+
+                <option value="goalie">
+                    Goalies
+                </option>
+
+            </select>
+
+
+            <!-- Add player -->
+            <a
+                href="{{ url_for('manage_roster', add=1) }}"
+                class="add-player-btn"
+            >
+                <span>+</span>
+                Add Player
+            </a>
+
+
+            <!-- Save all -->
+            <button
+                type="submit"
+                form="roster-stats-form"
+                class="save-all-btn"
+            >
+                Save All Changes
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         PAGE LAYOUT
+    ====================================================== -->
+
+    <div class="roster-management-layout">
+
+
+        <!-- =================================================
+             ROSTER TABLE
+        ================================================== -->
+
+        <section class="roster-table-card">
+
+            <form
+                id="roster-stats-form"
+                method="POST"
+                action="{{ url_for('manage_roster') }}"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <!-- TABLE HEADER -->
+
+                <div class="roster-table-header">
+
+                    <span>#</span>
+
+                    <span>Player</span>
+
+                    <span>Pos</span>
+
+                    <span>GP</span>
+
+                    <span>G</span>
+
+                    <span>A</span>
+
+                    <span>PTS</span>
+
+                    <span>PIM</span>
+
+                    <span>Special Stats</span>
+
+                    <span>Actions</span>
+
+                </div>
+
+
+                <!-- PLAYER ROWS -->
+
+                {% for player in players %}
+
+                {% if player.Position in ["C", "LW", "RW", "Center", "Wing", "Winger"] %}
+                    {% set position_group = "forward" %}
+
+                {% elif player.Position in ["D", "LD", "RD", "Defense"] %}
+                    {% set position_group = "defense" %}
+
+                {% elif player.Position in ["G", "Goalie"] %}
+                    {% set position_group = "goalie" %}
+
+                {% else %}
+                    {% set position_group = "other" %}
+                {% endif %}
+
+
+                <div
+                    class="roster-player-row"
+                    data-name="{{ player.First_Name }} {{ player.Last_Name }}"
+                    data-position="{{ position_group }}"
+                >
+
+
+                    <!-- JERSEY NUMBER -->
+
+                    <div class="jersey-number">
+
+                        {{ player.Number
+                           if player.Number is not none
+                           else "—"
+                        }}
+
+                    </div>
+
+
+                    <!-- PLAYER -->
+
+                    <div class="player-cell">
+
+                        <div class="player-avatar">
+
+                            {{ player.First_Name[0] }}
+
+                            {% if player.Last_Name %}
+                                {{ player.Last_Name[0] }}
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="player-name">
+
+                            <strong>
+                                {{ player.First_Name }}
+                                {{ player.Last_Name }}
+                            </strong>
+
+                            <small>
+                                #{{ player.Number }}
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- POSITION -->
+
+                    <span class="
+                        position-pill
+                        {% if position_group == 'goalie' %}
+                            goalie-position
+                        {% endif %}
+                    ">
+
+                        {{ player.Position }}
+
+                    </span>
+
+
+                    <!-- GP -->
+
+                    <input
+                        class="stat-input"
+                        type="number"
+                        min="0"
+                        name="gp_{{ player.player_id }}"
+                        value="{{ player.Games_Played or 0 }}"
+                        aria-label="Games played for {{ player.First_Name }}"
+                    >
+
+
+                    <!-- GOALS -->
+
+                    <input
+                        class="stat-input goals-input"
+                        type="number"
+                        min="0"
+                        name="goals_{{ player.player_id }}"
+                        value="{{ player.Goals or 0 }}"
+                        aria-label="Goals for {{ player.First_Name }}"
+                    >
+
+
+                    <!-- ASSISTS -->
+
+                    <input
+                        class="stat-input assists-input"
+                        type="number"
+                        min="0"
+                        name="assists_{{ player.player_id }}"
+                        value="{{ player.Assists or 0 }}"
+                        aria-label="Assists for {{ player.First_Name }}"
+                    >
+
+
+                    <!-- POINTS -->
+
+                    <div class="points-value">
+
+                        {{ player.Points or 0 }}
+
+                    </div>
+
+
+                    <!-- PIM -->
+
+                    <input
+                        class="stat-input"
+                        type="number"
+                        min="0"
+                        name="pim_{{ player.player_id }}"
+                        value="{{ player.PIM or 0 }}"
+                        aria-label="Penalty minutes for {{ player.First_Name }}"
+                    >
+
+
+                    <!-- SPECIAL / GOALIE STATS -->
+
+                    <div class="special-stats">
+
+                        {% if position_group == "goalie" %}
+
+                            <div class="goalie-field">
+
+                                <label>
+                                    W
+                                </label>
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    name="wins_{{ player.player_id }}"
+                                    value="{{ player.Wins or 0 }}"
+                                >
+
+                            </div>
+
+
+                            <div class="goalie-field">
+
+                                <label>
+                                    SO
+                                </label>
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    name="shutouts_{{ player.player_id }}"
+                                    value="{{ player.Shutouts or 0 }}"
+                                >
+
+                            </div>
+
+                        {% else %}
+
+                            <span class="not-applicable">
+                                —
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="player-actions">
+
+                        <a
+                            href="{{ url_for(
+                                'manage_roster',
+                                edit=player.player_id
+                            ) }}"
+                            class="edit-player-btn"
+                        >
+                            Edit
+                        </a>
+
+
+                        <button
+                            type="submit"
+                            form="delete-player-{{ player.player_id }}"
+                            class="remove-player-btn"
+                            onclick="
+                                return confirm(
+                                    'Remove {{ player.First_Name }} {{ player.Last_Name }} from this roster?'
+                                )
+                            "
+                        >
+                            Remove
+                        </button>
+
+                    </div>
+
+                </div>
+
+                {% else %}
+
+
+                <div class="empty-roster">
+
+                    <h3>No players yet</h3>
+
+                    <p>
+                        Add your first player to this season.
+                    </p>
+
+                </div>
+
+
+                {% endfor %}
+
+
+                <!-- INFO FOOTER -->
+
+                <div class="roster-info">
+
+                    <span class="info-icon">
+                        i
+                    </span>
+
+                    <span>
+                        Points are calculated automatically
+                        from Goals + Assists.
+                    </span>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+
+        <!-- =================================================
+             RIGHT SIDE PLAYER PANEL
+        ================================================== -->
+
+        <aside class="player-side-panel">
+
+
+            <!-- =========================
+                 DEFAULT
+            ========================== -->
+
+            {% if not add_mode and not selected_player %}
+
+            <div class="side-panel-header">
+
+                <h2>
+                    Manage Players
+                </h2>
+
+            </div>
+
+
+            <div class="side-panel-empty">
+
+                <div class="empty-player-icon">
+                    👤
+                </div>
+
+                <p>
+                    Select a player to edit their roster
+                    information or add a new player.
+                </p>
+
+                <small>
+                    Player statistics can be updated directly
+                    in the table.
+                </small>
+
+            </div>
+
+
+
+            <!-- =========================
+                 ADD PLAYER
+            ========================== -->
+
+            {% elif add_mode %}
+
+            <div class="side-panel-header">
+
+                <h2>
+                    Add Player
+                </h2>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="{{ url_for('add_roster_player') }}"
+                class="player-detail-form"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <div class="field-group">
+
+                    <label for="first-name">
+                        First Name
+                    </label>
+
+                    <input
+                        id="first-name"
+                        type="text"
+                        name="first_name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field-group">
+
+                    <label for="last-name">
+                        Last Name
+                    </label>
+
+                    <input
+                        id="last-name"
+                        type="text"
+                        name="last_name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="player-meta-fields">
+
+
+                    <div class="field-group">
+
+                        <label for="number">
+                            Number
+                        </label>
+
+                        <input
+                            id="number"
+                            type="number"
+                            min="0"
+                            max="99"
+                            name="number"
+                        >
+
+                    </div>
+
+
+                    <div class="field-group">
+
+                        <label for="position">
+                            Position
+                        </label>
+
+                        <select
+                            id="position"
+                            name="position"
+                            required
+                        >
+
+                            <option
+                                value=""
+                                disabled
+                                selected
+                            >
+                                Select
+                            </option>
+
+                            <option value="C">
+                                C
+                            </option>
+
+                            <option value="LW">
+                                LW
+                            </option>
+
+                            <option value="RW">
+                                RW
+                            </option>
+
+                            <option value="D">
+                                D
+                            </option>
+
+                            <option value="LD">
+                                LD
+                            </option>
+
+                            <option value="RD">
+                                RD
+                            </option>
+
+                            <option value="G">
+                                G
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="side-panel-actions">
+
+                    <button
+                        type="submit"
+                        class="save-player-btn"
+                    >
+                        Add Player
+                    </button>
+
+
+                    <a
+                        href="{{ url_for('manage_roster') }}"
+                        class="cancel-player-btn"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+
+
+            <!-- =========================
+                 EDIT PLAYER
+            ========================== -->
+
+            {% elif selected_player %}
+
+            <div class="side-panel-header">
+
+                <h2>
+                    Edit Player
+                </h2>
+
+            </div>
+
+
+            <div class="selected-player-summary">
+
+                <div class="large-player-avatar">
+
+                    {{ selected_player.First_Name[0] }}
+
+                    {% if selected_player.Last_Name %}
+                        {{ selected_player.Last_Name[0] }}
+                    {% endif %}
+
+                </div>
+
+
+                <div>
+
+                    <h3>
+
+                        {{ selected_player.First_Name }}
+                        {{ selected_player.Last_Name }}
+
+                    </h3>
+
+                    <p>
+
+                        #{{ selected_player.Number }}
+                        &nbsp; | &nbsp;
+                        {{ selected_player.Position }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'edit_roster_player',
+                    player_id=selected_player.player_id
+                ) }}"
+                class="player-detail-form"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <div class="field-group">
+
+                    <label>
+                        First Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="first_name"
+                        value="{{ selected_player.First_Name }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field-group">
+
+                    <label>
+                        Last Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="last_name"
+                        value="{{ selected_player.Last_Name }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="player-meta-fields">
+
+
+                    <div class="field-group">
+
+                        <label>
+                            Number
+                        </label>
+
+                        <input
+                            type="number"
+                            min="0"
+                            max="99"
+                            name="number"
+                            value="{{
+                                selected_player.Number
+                                if selected_player.Number is not none
+                                else ''
+                            }}"
+                        >
+
+                    </div>
+
+
+                    <div class="field-group">
+
+                        <label>
+                            Position
+                        </label>
+
+                        <select name="position">
+
+                            {% for pos in [
+                                "Center",
+                                "Winger",
+                                "Goalie"
+                            ] %}
+
+                            <option
+                                value="{{ pos }}"
+                                {% if selected_player.Position == pos %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ pos }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-edit-note">
+
+                    <strong>
+                        Updating statistics?
+                    </strong>
+
+                    <p>
+                        Goals, assists, games played and other
+                        statistics can be edited directly in the
+                        roster table.
+                    </p>
+
+                </div>
+
+
+                <div class="side-panel-actions">
+
+                    <button
+                        type="submit"
+                        class="save-player-btn"
+                    >
+                        Save Player
+                    </button>
+
+
+                    <a
+                        href="{{ url_for('manage_roster') }}"
+                        class="cancel-player-btn"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+
+            {% endif %}
+
+
+        </aside>
+
+    </div>
+
+</main>
+
+
+
+<!-- =========================================================
+     DELETE FORMS
+     Kept outside the main form to avoid nested forms.
+========================================================== -->
+
+{% for player in players %}
+
+<form
+    id="delete-player-{{ player.player_id }}"
+    method="POST"
+    action="{{ url_for(
+        'delete_roster_player',
+        player_id=player.player_id
+    ) }}"
+    hidden
+>
+
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+</form>
+
+{% endfor %}
+
+
+
+<script>
+
+/*
+ * Automatically recalculate a player's points
+ * when their goals or assists change.
+ */
+
+document
+    .querySelectorAll(".roster-row[data-player-id]")
+    .forEach(row => {
+
+        const goals =
+            row.querySelector(".goals-input");
+
+        const assists =
+            row.querySelector(".assists-input");
+
+        const points =
+            row.querySelector(".points-input");
+
+
+        if (!goals || !assists || !points) {
+            return;
+        }
+
+
+        function updatePoints() {
+
+            const goalValue =
+                Number(goals.value) || 0;
+
+            const assistValue =
+                Number(assists.value) || 0;
+
+            points.value =
+                goalValue + assistValue;
+
+        }
+
+
+        goals.addEventListener(
+            "input",
+            updatePoints
+        );
+
+        assists.addEventListener(
+            "input",
+            updatePoints
+        );
+
+    });
+
+</script>
+
+
+</body>
+
+</html>

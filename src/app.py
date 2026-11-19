@@ -209,10 +209,12 @@ class Roster(db.Model):
     Loss: int
     season_id:int
     player_id:int
+    roster_id:int
 
     player_id = db.Column(db.Integer())
+    roster_id = db.Column(db.Integer(), primary_key=True)
     season_id = db.Column(db.Integer())    
-    First_Name= db.Column(db.String(), primary_key=True)
+    First_Name= db.Column(db.String())
     Last_Name= db.Column(db.String())
     Position= db.Column(db.String())
     Games_Played=db.Column(db.Integer())
@@ -396,6 +398,439 @@ def admin():
         abort(403)
 
     return render_template("admin.html")
+
+# ============================================================
+# MANAGE ROSTER
+# ============================================================
+
+def get_next_player_id(season_id):
+    """
+    Returns the next available player ID for the selected season.
+    """
+
+    max_player_id = (
+        db.session.query(func.max(Roster.player_id))
+        .filter(Roster.season_id == season_id)
+        .scalar()
+    )
+
+    return (max_player_id or 0) + 1
+
+
+def get_non_negative_int(field_name):
+    """
+    Safely gets an integer from a submitted form.
+
+    Negative values are converted to 0 so a user cannot submit
+    negative goals, assists, games played, etc.
+    """
+
+    value = request.form.get(field_name, type=int)
+
+    if value is None:
+        return 0
+
+    return max(value, 0)
+
+
+@app.route("/manage_roster", methods=["GET", "POST"])
+@admin_required
+def manage_roster():
+
+    season_id = get_selected_season_id()
+
+    players = (
+        db.session.query(Roster)
+        .filter(Roster.season_id == season_id)
+        .order_by(
+            Roster.Position.asc(),
+            Roster.Number.asc(),
+            Roster.Last_Name.asc()
+        )
+        .all()
+    )
+
+    # --------------------------------------------------------
+    # SAVE STAT CHANGES
+    # --------------------------------------------------------
+    if request.method == "POST":
+
+        for player in players:
+
+            player_id = player.player_id
+
+            games_played = get_non_negative_int(
+                f"gp_{player_id}"
+            )
+
+            goals = get_non_negative_int(
+                f"goals_{player_id}"
+            )
+
+            assists = get_non_negative_int(
+                f"assists_{player_id}"
+            )
+
+            pim = get_non_negative_int(
+                f"pim_{player_id}"
+            )
+
+            player.Games_Played = games_played
+            player.Goals = goals
+            player.Assists = assists
+
+            # Calculate points automatically.
+            player.Points = goals + assists
+
+            player.PIM = pim
+
+            # Goalie-specific stats.
+            if player.Position in ["G", "Goalie"]:
+
+                player.Wins = get_non_negative_int(
+                    f"wins_{player_id}"
+                )
+
+                player.Shutouts = get_non_negative_int(
+                    f"shutouts_{player_id}"
+                )
+
+            else:
+                player.Wins = 0
+                player.Shutouts = 0
+
+        db.session.commit()
+
+        flash(
+            "Roster statistics updated successfully.",
+            "success"
+        )
+
+        return redirect(url_for("manage_roster"))
+
+    # --------------------------------------------------------
+    # ADD / EDIT PANEL STATE
+    # --------------------------------------------------------
+
+    add_mode = request.args.get("add") == "1"
+
+    edit_id = request.args.get(
+        "edit",
+        type=int
+    )
+
+    selected_player = None
+
+    if edit_id:
+
+        selected_player = (
+            db.session.query(Roster)
+            .filter(
+                Roster.player_id == edit_id,
+                Roster.season_id == season_id
+            )
+            .first()
+        )
+
+    return render_template(
+        "manage_roster.html",
+        players=players,
+        add_mode=add_mode,
+        selected_player=selected_player
+    )
+
+
+#Helper function to get the next roster id
+def get_next_roster_id():
+
+    max_roster_id = (
+        db.session.query(
+            func.max(Roster.roster_id)
+        )
+        .scalar()
+    )
+
+    return (max_roster_id or 0) + 1
+# ============================================================
+# ADD PLAYER
+# ============================================================
+
+@app.route(
+    "/manage_roster/add",
+    methods=["POST"]
+)
+@admin_required
+def add_roster_player():
+
+    season_id = get_selected_season_id()
+
+    first_name = request.form.get(
+        "first_name",
+        ""
+    ).strip()
+
+    last_name = request.form.get(
+        "last_name",
+        ""
+    ).strip()
+
+    position = request.form.get(
+        "position",
+        ""
+    ).strip()
+
+    number = request.form.get(
+        "number",
+        type=int
+    )
+
+    if not first_name or not last_name:
+
+        flash(
+            "First and last name are required.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "manage_roster",
+                add=1
+            )
+        )
+
+    allowed_positions = {
+        "Center",
+        "Winger",
+        "Goalie"
+    }
+
+    if position not in allowed_positions:
+
+        flash(
+            "Please select a valid position.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "manage_roster",
+                add=1
+            )
+        )
+
+    if number is not None and number < 0:
+
+        flash(
+            "Player number cannot be negative.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "manage_roster",
+                add=1
+            )
+        )
+
+    player_id = get_next_player_id(
+        season_id
+    )
+    existing_player = (
+    db.session.query(Roster)
+    .filter(
+        func.lower(Roster.First_Name)
+        == first_name.lower(),
+
+        func.lower(Roster.Last_Name)
+        == last_name.lower(),
+
+        Roster.season_id == season_id
+    )
+    .first()
+)
+    existing_player = (
+    db.session.query(Roster)
+    .filter(
+        func.lower(Roster.First_Name)
+        == first_name.lower(),
+
+        func.lower(Roster.Last_Name)
+        == last_name.lower(),
+
+        Roster.season_id == season_id
+    )
+    .first()
+)
+
+    if existing_player:
+
+        flash(
+            f"{first_name} {last_name} is already "
+            "on this season's roster.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "manage_roster",
+                add=1
+            )
+        )
+
+    player = Roster(
+        player_id=player_id,
+        season_id=season_id,
+
+        First_Name=first_name,
+        Last_Name=last_name,
+        Position=position,
+        Number=number,
+
+        Games_Played=0,
+        Goals=0,
+        Assists=0,
+        Points=0,
+        PIM=0,
+
+        Wins=0,
+        Loss=0,
+        Shutouts=0,
+        roster_id=get_next_roster_id()
+    )
+
+    db.session.add(player)
+    db.session.commit()
+
+    flash(
+        f"{first_name} {last_name} added to the roster.",
+        "success"
+    )
+
+    return redirect(
+        url_for("manage_roster")
+    )
+
+
+# ============================================================
+# EDIT PLAYER INFORMATION
+# ============================================================
+
+@app.route(
+    "/manage_roster/<int:player_id>/edit",
+    methods=["POST"]
+)
+@admin_required
+def edit_roster_player(player_id):
+
+    season_id = get_selected_season_id()
+
+    player = (
+        db.session.query(Roster)
+        .filter(
+            Roster.player_id == player_id,
+            Roster.season_id == season_id
+        )
+        .first()
+    )
+
+    if not player:
+        abort(404)
+
+    first_name = request.form.get(
+        "first_name",
+        ""
+    ).strip()
+
+    last_name = request.form.get(
+        "last_name",
+        ""
+    ).strip()
+
+    position = request.form.get(
+        "position",
+        ""
+    ).strip()
+
+    number = request.form.get(
+        "number",
+        type=int
+    )
+
+    if not first_name or not last_name:
+
+        flash(
+            "First and last name are required.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "manage_roster",
+                edit=player_id
+            )
+        )
+
+    player.First_Name = first_name
+    player.Last_Name = last_name
+    player.Position = position
+    player.Number = number
+
+    db.session.commit()
+
+    flash(
+        "Player updated successfully.",
+        "success"
+    )
+
+    return redirect(
+        url_for("manage_roster")
+    )
+
+
+# ============================================================
+# DELETE PLAYER
+# ============================================================
+
+@app.route(
+    "/manage_roster/<int:player_id>/delete",
+    methods=["POST"]
+)
+@admin_required
+def delete_roster_player(player_id):
+
+    season_id = get_selected_season_id()
+
+    player = (
+        db.session.query(Roster)
+        .filter(
+            Roster.player_id == player_id,
+            Roster.season_id == season_id
+        )
+        .first()
+    )
+
+    if not player:
+        abort(404)
+
+    player_name = (
+        f"{player.First_Name} "
+        f"{player.Last_Name}"
+    )
+
+    db.session.delete(player)
+    db.session.commit()
+
+    flash(
+        f"{player_name} removed from the roster.",
+        "success"
+    )
+
+    return redirect(
+        url_for("manage_roster")
+    )
+
+
+
 
 #Manage Games
 @app.route("/manage_games")
@@ -614,38 +1049,6 @@ def save_team_logo(file_):
     return f"images/{filename}"
 
 
-# def save_team_logo(file_):
-
-#     logo = request.files.get(file_)
-
-#     # No image selected
-#     if not logo or logo.filename == "":
-#         return DEFAULT_TEAM_LOGO
-
-#     filename = secure_filename(logo.filename)
-
-#     # Make filename unique
-#     unique_filename = f"{uuid.uuid4().hex}_{filename}"
-
-#      # Get Flask's actual static folder
-#     upload_folder = (
-#         Path(current_app.static_folder)
-#         / "images"
-        
-#     )
-
-#     # Create folder if it doesn't exist
-#     upload_folder.mkdir(
-#         parents=True,
-#         exist_ok=True
-#     )
-
-#     save_path = upload_folder / unique_filename
-
-#     logo.save(save_path)
-
-#     # Store this in PostgreSQL
-#     return f"images/{unique_filename}"
 
 #Adds the new team from the form in manage_standings.html.
 def add_team(season_id):
@@ -696,6 +1099,7 @@ def get_team(standings_id, season_id):
         .first()
     )
 
+#Gets the values from the input table and commits to db.
 def update_standings_(standings):
     for team in standings:
 
@@ -1142,7 +1546,11 @@ def get_first_five():
     games = ( db.session.query(Calendar)
                   .filter(Calendar.date >= now, Calendar.season_id==get_selected_season_id())
                   .order_by(Calendar.date.asc()).limit(5).all())
+
     five=[]
+    if len(games)<1:
+        return jsonify({"games":five})
+
     for item in games:
                 
         # Format date: Sep 22

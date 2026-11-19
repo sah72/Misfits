@@ -1,0 +1,1426 @@
+/* =========================================================
+   MANAGE ROSTER
+========================================================= */
+
+:root {
+
+    --purple-dark: #2d0038;
+    --purple: #530065;
+    --purple-light: #765080;
+
+    --cream: #fff9ef;
+    --cream-soft: #fffdf9;
+
+    --gold: #e3b94e;
+    --gold-soft: #f6e7b4;
+
+    --border: #e4d2ae;
+
+    --red: #cf241c;
+
+    --text: #25002d;
+    --muted: #735f76;
+
+    --page-bg: #f8f8f8;
+
+}
+
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.roster-admin-page {
+
+    padding:
+        40px
+        38px
+        60px;
+
+    min-height:
+        calc(100vh - 120px);
+
+    background:
+        var(--page-bg);
+
+}
+
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.roster-page-header {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-end;
+
+    gap: 30px;
+
+    margin-bottom: 30px;
+
+}
+
+
+.roster-title-area h1 {
+
+    margin: 0;
+
+    color:
+        var(--text);
+
+    font-size: 2.25rem;
+
+    line-height: 1;
+
+}
+
+
+.roster-title-area p {
+
+    margin:
+        9px
+        0
+        0;
+
+    color:
+        var(--purple);
+
+    font-weight: 700;
+
+    font-size: 1rem;
+
+}
+
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.roster-toolbar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content:
+        flex-end;
+
+    gap: 14px;
+
+}
+
+
+.roster-search {
+
+    display: flex;
+
+    align-items: center;
+
+    width: 280px;
+
+    height: 48px;
+
+    padding:
+        0
+        14px;
+
+    border:
+        1px solid
+        #d6d1d6;
+
+    border-radius: 9px;
+
+    background: white;
+
+}
+
+
+.search-icon {
+
+    margin-right: 10px;
+
+    color:
+        #7b7580;
+
+    font-size: 1.35rem;
+
+}
+
+
+.roster-search input {
+
+    width: 100%;
+
+    border: 0;
+
+    outline: 0;
+
+    font: inherit;
+
+    background:
+        transparent;
+
+}
+
+
+.position-filter {
+
+    height: 48px;
+
+    padding:
+        0
+        16px;
+
+    border:
+        1px solid
+        #d6d1d6;
+
+    border-radius: 9px;
+
+    background: white;
+
+    color:
+        var(--text);
+
+    font: inherit;
+
+}
+
+
+
+.add-player-btn,
+.save-all-btn {
+
+    height: 48px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap: 8px;
+
+    padding:
+        0
+        21px;
+
+    border-radius:
+        9px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+}
+
+
+.add-player-btn {
+
+    border:
+        2px solid
+        var(--gold);
+
+    color:
+        var(--purple-dark);
+
+    background:
+        var(--cream);
+
+}
+
+
+.add-player-btn:hover {
+
+    background:
+        #fff0cf;
+
+}
+
+
+.save-all-btn {
+
+    border: 0;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #650078,
+            #430052
+        );
+
+    box-shadow:
+        0
+        5px
+        12px
+        rgba(63, 0, 76, 0.15);
+
+}
+
+
+.save-all-btn:hover {
+
+    background:
+        var(--purple-dark);
+
+}
+
+
+
+/* =========================================================
+   MAIN GRID
+========================================================= */
+
+.roster-management-layout {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(760px, 1fr)
+        310px;
+
+    gap: 24px;
+
+    align-items: start;
+
+}
+
+
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
+
+.roster-table-card {
+
+    overflow-x: auto;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        12px;
+
+    background:
+        var(--cream);
+
+    box-shadow:
+        0
+        8px
+        25px
+        rgba(45, 0, 56, 0.07);
+
+}
+
+
+#roster-stats-form {
+
+    min-width: 930px;
+
+}
+
+
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.roster-table-header,
+.roster-player-row {
+
+    display: grid;
+
+    grid-template-columns:
+
+        45px
+
+        minmax(
+            175px,
+            1.5fr
+        )
+
+        58px
+
+        62px
+
+        62px
+
+        62px
+
+        68px
+
+        62px
+
+        120px
+
+        105px;
+
+    gap: 10px;
+
+    align-items: center;
+
+}
+
+
+.roster-table-header {
+
+    min-height: 62px;
+
+    padding:
+        0
+        15px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            90deg,
+            #2e003a,
+            #470054
+        );
+
+    font-size: .78rem;
+
+    font-weight: 800;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+
+/* =========================================================
+   PLAYER ROW
+========================================================= */
+
+.roster-player-row {
+
+    min-height: 88px;
+
+    padding:
+        10px
+        15px;
+
+    border-bottom:
+        1px solid
+        #eadbc0;
+
+    transition:
+        background .15s ease;
+
+}
+
+
+.roster-player-row:hover {
+
+    background:
+        #fff4dd;
+
+}
+
+
+.roster-player-row:last-of-type {
+
+    border-bottom: 0;
+
+}
+
+
+
+/* =========================================================
+   PLAYER IDENTITY
+========================================================= */
+
+.jersey-number {
+
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 8px;
+
+    background:
+        #fffdf8;
+
+    color:
+        var(--text);
+
+    font-weight: 800;
+
+}
+
+
+.player-cell {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+}
+
+
+.player-avatar,
+.large-player-avatar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border:
+        2px solid
+        var(--gold);
+
+    border-radius:
+        50%;
+
+    color: white;
+
+    background:
+        var(--purple-dark);
+
+    font-weight: 800;
+
+}
+
+
+.player-avatar {
+
+    width: 46px;
+
+    height: 46px;
+
+    flex:
+        0 0
+        46px;
+
+    font-size:
+        .9rem;
+
+}
+
+
+.large-player-avatar {
+
+    width: 72px;
+
+    height: 72px;
+
+    flex:
+        0 0
+        72px;
+
+    font-size:
+        1.2rem;
+
+}
+
+
+.player-name {
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+.player-name strong {
+
+    color:
+        var(--text);
+
+    font-size:
+        .94rem;
+
+}
+
+
+.player-name small {
+
+    margin-top: 3px;
+
+    color:
+        var(--muted);
+
+}
+
+
+
+/* =========================================================
+   POSITION
+========================================================= */
+
+.position-pill {
+
+    display: inline-flex;
+
+    width: 40px;
+
+    justify-content:
+        center;
+
+    padding:
+        7px
+        4px;
+
+    border-radius:
+        7px;
+
+    color:
+        var(--purple);
+
+    background:
+        #ece5ff;
+
+    font-weight: 800;
+
+}
+
+
+.goalie-position {
+
+    color:
+        #644600;
+
+    background:
+        #fae8af;
+
+}
+
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stat-input {
+
+    width: 58px;
+
+    height: 44px;
+
+    box-sizing:
+        border-box;
+
+    border:
+        1px solid
+        #d9cfbf;
+
+    border-radius:
+        7px;
+
+    background: white;
+
+    color:
+        var(--text);
+
+    font:
+        inherit;
+
+    font-weight:
+        650;
+
+    text-align: center;
+
+}
+
+
+.stat-input:focus {
+
+    outline:
+        2px solid
+        var(--gold);
+
+    border-color:
+        var(--gold);
+
+}
+
+
+.points-value {
+
+    width: 60px;
+
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border:
+        1px solid
+        #ecd79e;
+
+    border-radius:
+        7px;
+
+    color:
+        var(--purple-dark);
+
+    background:
+        #fff1c9;
+
+    font-weight: 800;
+
+}
+
+
+
+/* =========================================================
+   GOALIE SPECIAL STATS
+========================================================= */
+
+.special-stats {
+
+    min-height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+}
+
+
+.goalie-field {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 2px;
+
+}
+
+
+.goalie-field label {
+
+    color:
+        var(--purple);
+
+    font-size:
+        .65rem;
+
+    font-weight: 800;
+
+}
+
+
+.goalie-field input {
+
+    width: 43px;
+
+    height: 30px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 5px;
+
+    text-align: center;
+
+}
+
+
+.not-applicable {
+
+    width: 100%;
+
+    padding: 10px;
+
+    border-radius:
+        7px;
+
+    color:
+        #8d868c;
+
+    background:
+        #f2f0ec;
+
+    text-align: center;
+
+}
+
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.player-actions {
+
+    display: flex;
+
+    flex-direction:
+        column;
+
+    gap: 5px;
+
+}
+
+
+.edit-player-btn,
+.remove-player-btn {
+
+    width: 86px;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        7px
+        5px;
+
+    border-radius:
+        6px;
+
+    background:
+        transparent;
+
+    font:
+        inherit;
+
+    font-size:
+        .76rem;
+
+    font-weight: 650;
+
+    text-decoration:
+        none;
+
+    text-align: center;
+
+    cursor: pointer;
+
+}
+
+
+.edit-player-btn {
+
+    border:
+        1px solid
+        var(--purple);
+
+    color:
+        var(--purple);
+
+}
+
+
+.remove-player-btn {
+
+    border:
+        1px solid
+        var(--red);
+
+    color:
+        var(--red);
+
+}
+
+
+.edit-player-btn:hover {
+
+    color: white;
+
+    background:
+        var(--purple);
+
+}
+
+
+.remove-player-btn:hover {
+
+    color: white;
+
+    background:
+        var(--red);
+
+}
+
+
+
+/* =========================================================
+   INFO FOOTER
+========================================================= */
+
+.roster-info {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    margin: 18px;
+
+    padding:
+        14px
+        16px;
+
+    border-radius:
+        8px;
+
+    color:
+        #67506d;
+
+    background:
+        #f1ebf5;
+
+    font-size:
+        .84rem;
+
+    font-style: italic;
+
+}
+
+
+.info-icon {
+
+    width: 24px;
+
+    height: 24px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex:
+        0 0
+        24px;
+
+    border-radius: 50%;
+
+    color: white;
+
+    background:
+        var(--purple);
+
+    font-style:
+        normal;
+
+    font-weight: 800;
+
+}
+
+
+
+/* =========================================================
+   RIGHT PANEL
+========================================================= */
+
+.player-side-panel {
+
+    position: sticky;
+
+    top: 25px;
+
+    padding:
+        25px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        12px;
+
+    background:
+        var(--cream);
+
+    box-shadow:
+        0
+        8px
+        25px
+        rgba(45, 0, 56, 0.06);
+
+}
+
+
+.side-panel-header {
+
+    margin-bottom:
+        21px;
+
+    border-bottom:
+        2px solid
+        var(--gold);
+
+}
+
+
+.side-panel-header h2 {
+
+    margin:
+        0
+        0
+        12px;
+
+    color:
+        var(--text);
+
+    font-size:
+        1.45rem;
+
+}
+
+
+.side-panel-empty {
+
+    padding:
+        14px
+        0;
+
+    color:
+        var(--muted);
+
+    line-height:
+        1.6;
+
+}
+
+
+.empty-player-icon {
+
+    width: 58px;
+
+    height: 58px;
+
+    margin-bottom:
+        15px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius:
+        50%;
+
+    background:
+        #f1e7c9;
+
+    font-size:
+        1.5rem;
+
+}
+
+
+.side-panel-empty small {
+
+    display: block;
+
+    margin-top:
+        12px;
+
+}
+
+
+
+/* =========================================================
+   SELECTED PLAYER
+========================================================= */
+
+.selected-player-summary {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom:
+        24px;
+
+}
+
+
+.selected-player-summary h3 {
+
+    margin: 0;
+
+    color:
+        var(--text);
+
+}
+
+
+.selected-player-summary p {
+
+    margin:
+        5px
+        0
+        0;
+
+    color:
+        var(--muted);
+
+}
+
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.player-detail-form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+
+}
+
+
+.field-group {
+
+    display: flex;
+
+    flex-direction:
+        column;
+
+    gap: 6px;
+
+}
+
+
+.field-group label {
+
+    color:
+        var(--text);
+
+    font-size:
+        .82rem;
+
+    font-weight: 700;
+
+}
+
+
+.field-group input,
+.field-group select {
+
+    width: 100%;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        10px
+        11px;
+
+    border:
+        1px solid
+        #d9cfbf;
+
+    border-radius:
+        7px;
+
+    background: white;
+
+    font: inherit;
+
+}
+
+
+.field-group input:focus,
+.field-group select:focus {
+
+    outline:
+        2px solid
+        var(--gold);
+
+}
+
+
+.player-meta-fields {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1.3fr;
+
+    gap: 12px;
+
+}
+
+
+
+/* =========================================================
+   SIDE PANEL NOTE
+========================================================= */
+
+.stat-edit-note {
+
+    margin-top: 5px;
+
+    padding:
+        13px;
+
+    border-radius:
+        8px;
+
+    color:
+        #614c66;
+
+    background:
+        #f0eaf3;
+
+    font-size:
+        .82rem;
+
+}
+
+
+.stat-edit-note p {
+
+    margin:
+        5px
+        0
+        0;
+
+    line-height:
+        1.45;
+
+}
+
+
+
+/* =========================================================
+   PANEL ACTIONS
+========================================================= */
+
+.side-panel-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top:
+        7px;
+
+}
+
+
+.save-player-btn,
+.cancel-player-btn {
+
+    flex: 1;
+
+    padding:
+        11px
+        8px;
+
+    border-radius:
+        7px;
+
+    font: inherit;
+
+    font-weight: 700;
+
+    text-align: center;
+
+    text-decoration:
+        none;
+
+    cursor: pointer;
+
+}
+
+
+.save-player-btn {
+
+    border: 0;
+
+    color: white;
+
+    background:
+        var(--purple);
+
+}
+
+
+.cancel-player-btn {
+
+    border:
+        1px solid
+        var(--gold);
+
+    color:
+        var(--purple);
+
+    background:
+        var(--cream);
+
+}
+
+
+
+/* =========================================================
+   EMPTY TABLE
+========================================================= */
+
+.empty-roster {
+
+    padding:
+        65px
+        20px;
+
+    color:
+        var(--muted);
+
+    text-align: center;
+
+}
+
+
+.empty-roster h3 {
+
+    margin:
+        0
+        0
+        8px;
+
+    color:
+        var(--text);
+
+}
+
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1250px) {
+
+    .roster-page-header {
+
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .roster-toolbar {
+
+        width: 100%;
+
+        justify-content:
+            flex-start;
+
+        flex-wrap:
+            wrap;
+
+    }
+
+}
+
+
+@media (max-width: 1050px) {
+
+    .roster-management-layout {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .player-side-panel {
+
+        position: static;
+
+        max-width:
+            500px;
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .roster-admin-page {
+
+        padding:
+            25px
+            15px;
+
+    }
+
+
+    .roster-search {
+
+        width:
+            calc(100% - 30px);
+
+    }
+
+
+    .position-filter {
+
+        flex: 1;
+
+    }
+
+
+    .add-player-btn,
+    .save-all-btn {
+
+        flex: 1;
+
+    }
+
+}
